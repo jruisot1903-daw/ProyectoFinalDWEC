@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "nombre": "Laura",
+        "apellidos": "Gómez Torres",
+        "especialidad": "Medicina General",
+        "telefono": "678112233"
+    },
+    {
+        "id": 2,
+        "nombre": "Carlos",
+        "apellidos": "Ramírez Díaz",
+        "especialidad": "Pediatría",
+        "telefono": "612334455"
+    },
+    {
+        "id": 3,
+        "nombre": "Elena",
+        "apellidos": "Serrano Muñoz",
+        "especialidad": "Traumatología",
+        "telefono": "699887766"
+    }
+]

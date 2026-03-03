@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "pacienteId": 1,
+        "medicoId": 1,
+        "inicio": "2026-03-10T10:00:00",
+        "fin": "2026-03-10T10:15:00",
+        "estado": "pendiente"
+    },
+    {
+        "id": 2,
+        "pacienteId": 2,
+        "medicoId": 2,
+        "inicio": "2026-03-11T09:30:00",
+        "fin": "2026-03-11T09:45:00",
+        "estado": "pendiente"
+    },
+    {
+        "id": 3,
+        "pacienteId": 3,
+        "medicoId": 3,
+        "inicio": "2026-03-12T12:00:00",
+        "fin": "2026-03-12T12:15:00",
+        "estado": "pendiente"
+    },
+    {
+        "id": 4,
+        "pacienteId": 1,
+        "medicoId": 2,
+        "inicio": "2026-03-15T17:00:00",
+        "fin": "2026-03-15T17:15:00",
+        "estado": "pendiente"
+    },
+    {
+        "id": 5,
+        "pacienteId": 2,
+        "medicoId": 1,
+        "inicio": "2026-03-18T11:30:00",
+        "fin": "2026-03-18T11:45:00",
+        "estado": "pendiente"
+    }
+]
