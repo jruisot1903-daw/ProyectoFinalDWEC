@@ -1,3 +1,6 @@
+Esta aplicacion cabe recalcar que es solo para Pacientes , vaya no tendremos problema a la hora de que inicien sesión ya que solo pueden inciiar un paciente
+Los medicos solo los queremos aqui para "asignarles" un paciente a la hora que elija el enfermo.
+
 Realizar una aplicación que realice reservas y anulaciones de las mismas de citas medicas y llevar un control de ellas 
 3 clases : 
 Medico --> id_med , nombre ,apellidos , especialidad , telefono.

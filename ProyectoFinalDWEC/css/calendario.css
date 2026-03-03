@@ -1,0 +1,65 @@
+/*Le he puesto a casi todo !important porque si no al darle f5 se me cambiaba y me dejaba los estilos por defecto que tiene*/
+:root {
+    /* Colores principales */
+    --fc-border-color: #c7c7c7 !important; /*Color de los bordes del calendario*/
+    --fc-button-bg-color: #209226 !important; /*Colo de los botones para pasar y retroceder la semana y el boton de volver al dia en el candelario*/
+    --fc-button-border-color: #000000 !important; /*Color de los bordes del los mismos botones*/
+    --fc-button-hover-bg-color: #116311 !important; /*Colo al ponerte encima de los botones antes mencionados*/
+    --fc-button-active-bg-color: #113313 !important; /*Cuando se activa (se hace click encima) el color que se pone el boton*/
+    
+    /* Fuente y Textos */
+    --fc-small-font-size: 0.85em !important;
+    --fc-page-bg-color: #ffffff !important;
+    
+    /* Sombras y Hoy */
+    --fc-today-bg-color: rgba(28, 165, 28, 0.705) !important;
+}
+
+/* Redondear botones y bordes */
+.fc .fc-button {
+    border-radius: 8px !important;
+    text-transform: capitalize !important;
+    font-weight: 600 !important;
+}
+
+/* Estilo de las citas */
+.fc-event {
+    border-radius: 6px !important;
+    padding: 3px 6px;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#calendar {
+    width: 50%;
+    max-height: 550px;
+    margin-top: 10px;
+}
+
+/* Sombrear celdas pasadas visualmente */
+.fc-day-past,
+.fc-timegrid-slot-past {
+    background-color: #b9b8b8 !important;
+    cursor: not-allowed;
+}
+
+/* Cambia el color de la línea que cruza el calendario */
+.fc-timegrid-now-indicator-line {
+    border-color: #9523ff !important;
+    border-style: dashed !important;  /* Línea punteada */
+    box-shadow: 0 0 8px rgba(150, 22, 255, 0.5);
+}
+
+/* Cambia el color del triángulo que aparece en el eje de las horas */
+
+.fc-timegrid-now-indicator-arrow {
+    /* Reseteamos los bordes que no queremos tocar */
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    
+    /* Pintamos solo el borde izquierdo, que es el que forma la punta hacia la derecha */
+    border-left-color: #9421ff !important;
+    
+    /* Ajuste de tamaño opcional */
+    border-width: 6px 0 6px 7px !important; 
+}

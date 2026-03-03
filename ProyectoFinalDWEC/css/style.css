@@ -16,6 +16,40 @@ body {
     background-repeat: no-repeat;
 }
 
+/*****************
+  TRANSICIÓN ENTRE
+  PAGINAS
+*****************/
+
+@view-transition {
+  navigation: auto; /*Para meterle una transición al irte a la otra pagina*/
+}
+
+
+/*Animación para la página que sale*/
+
+@keyframes salir {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-100px); }
+}
+
+/* Animación para la página que ENTRA */
+
+@keyframes entrar {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* hacemos referencia a la pagina que dejamos y a la que vamos "old" la que dejamos "new" a la que vamos*/
+::view-transition-old(root) {
+  animation: salir 0.6s ease-in both;
+}
+
+
+::view-transition-new(root) {
+  animation: entrar 0.6s ease-out both;
+}
+
 /**************
   SECTION
 **************/

@@ -1,22 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservas Citas - Área Sanitaria Norte de Málaga</title>
+    <title>Reservar Citas - Área Sanitaria Norte de Málaga</title>
     <link rel="stylesheet" href="../css/resevas.css">
+    <link rel="stylesheet" href="../css/calendario.css">
+    <link rel="shortcut icon" href="../img/Junta de Andalucia/favicon.ico" type="image/x-icon">
+    <script type="module" src="../js/main.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/index.global.min.js'></script>
 </head>
+
 <body>
     <header class="header">
-        
+        <img src="../img/Junta de Andalucia/JA_logotipo_genérico.png" alt="">
+        <h1>Reserva Citas Medicas</h1>
+
+        <div class="login-header">
+            <input type="text" name="login" id="login" placeholder="Introduzca su nombre">
+            <input type="password" name="pass" id="pass" placeholder="Introduzca su contraseña">
+
+            <button id="btn-login-user" class="btn btn-login">Login</button>
+            <button id="btn-logout" class="btn btn-pass">Exit</button>
+        </div>
+        <p id="texto"> </p>
+        <p id="err"></p>
     </header>
 
     <section class="section-pp">
-
+       <div id='calendar'></div>
     </section>
 
-    <footer class="footer">
+    <footer>
+        <div class="container">
+            <p>Servicio Andaluz de la Salud</p>
+            <div>
+                <a href="https://juntadeandalucia.es/organismos/sanidadpresidenciayemergencias.html">Conserjeria de
+                    Sanidad, Presidencia y Emergencia</a>
+                <img src="https://hospitaldeantequera.es/wp-content/uploads/2023/01/enlaces-salientes.png" alt="">
+            </div>
 
+            <div>
+                <a href="https://juntadeandalucia.es/index.html">Junta de Andalucía</a>
+                <img src="https://hospitaldeantequera.es/wp-content/uploads/2023/01/enlaces-salientes.png" alt="">
+            </div>
+
+            <div>
+                <ul class="footer-links uno">
+                    <li><a href="https://hospitaldeantequera.es/contacto/">Contacto</a></li>
+                    <li><a href="https://hospitaldeantequera.es/mapa-web/">Mapa Web</a></li>
+                    <li><a href="https://hospitaldeantequera.es/politica-editorial/">Política editorial</a></li>
+                </ul>
+                <ul class="footer-links dos">
+                    <li><a href="https://hospitaldeantequera.es/politica-de-privacidad/">Política de privacidad</a></li>
+                    <li><a href="https://hospitaldeantequera.es/aviso-legal/">Aviso Legal</a></li>
+                </ul>
+
+                <ul class="footer-links tres">
+                    <li><a href="https://hospitaldeantequera.es/accesibilidad/">Accesibilidad</a></li>
+                    <li><a href="https://hospitaldeantequera.es/politica-de-cookies/">Política de cookies</a></li>
+                </ul>
+            </div>
+            <div class="social-icon-footer">
+                <a href="https://www.facebook.com/saludNorteMalaga"><img src="../img/icons8-facebook-50.png" alt=""></a>
+                <a href="https://www.twitter.com/SaludNorteMalag"><img src="../img/icons8-twitterx-50.png" alt=""></a>
+                <a href="https://www.instagram.com/saludnortemalag/?igshid=YmMyMTA2M2Y%3D"><img
+                        src="../img/icons8-instagram-50.png" alt=""></a>
+            </div>
+
+        </div>
     </footer>
 </body>
+
 </html>
