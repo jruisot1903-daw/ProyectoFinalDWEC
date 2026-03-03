@@ -1,0 +1,11 @@
+Realizar una aplicación que realice reservas y anulaciones de las mismas de citas medicas y llevar un control de ellas 
+3 clases : 
+Medico --> id_med , nombre ,apellidos , especialidad , telefono.
+Cita_medica --> id_cita ,fecha_cita, hora_cita, id_med , DNI_paciente.  
+Paciente --> DNI, nombre , apellidos.
+
+Los datos se almacenaran en un .JSON donde tendremos 3 para simular una base de datos 
+Medicos.JSON 
+Citas_medicas.JSON
+Pacientes.JSON
+

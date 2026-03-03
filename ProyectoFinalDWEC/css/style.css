@@ -1,0 +1,68 @@
+/**************
+  RESETEO INICIAL
+**************/
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+/**************
+  BODY
+**************/
+body {
+    background: linear-gradient(to bottom right, #009c53, #00703C, #005A30); /*to bottom right para que sea en diagonal para la derecha*/
+    background-repeat: no-repeat;
+}
+
+/**************
+  SECTION
+**************/
+a{
+    text-decoration: none;
+    color: white;
+    text-decoration: none;
+    text-shadow:
+        1px 1px 2px white,
+        0 0 1em rgb(14, 139, 14),
+        0 0 0.2em black;
+}
+.section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+
+.section>img {
+    width: 30%;
+    animation-name: deslizar;
+    animation-duration: 3s;
+    margin-bottom: 5%;
+}
+
+.section>h1 {
+    margin-bottom: 16%;
+    animation-duration: 3s;
+    animation-name: deslizar;
+}
+
+
+@keyframes deslizar {
+    from {
+        margin-left: 150%;
+        display: none;
+    }
+
+    to{
+        margin-left: 0%;
+        display: block;
+    }
+}
+
+::-webkit-scrollbar{
+    display: none; /*Para quitar la barra de desplazamiento */
+}
