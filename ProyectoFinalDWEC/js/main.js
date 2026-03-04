@@ -27,7 +27,7 @@ document.getElementById("btn-login-user").addEventListener("click", function () 
         return;
     }
 
-    // Por ahora usamos el DNI como contraseña 
+    // Usamos el DNI como contraseña 
     if (paciente.dni !== passIntroducida) {
         err.innerHTML = "Contraseña incorrecta";
         return;
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function () {
             slotMaxTime: '20:00:00',     // Hora fin jornada
             slotDuration: '00:15:00',    // Intervalos de 15 minutos
             allDaySlot: false,           // Quita la fila de "Todo el día"
-            nowIndicator: true,          // Nos marca con una linea por donde vamos para el tema de las reservas
+            nowIndicator: true,          // Nos marca con una linea por donde vamos correspondiente con la hora actual
 
             // Restricciones de horarios
             businessHours: [
@@ -129,9 +129,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Bloqueamos las posibles reservas en horarios o dias que tan han pasado 
             selectAllow: function (selectInfo) {
-                const ahora = new Date();
-                // Solo permite si la fecha de inicio es mayor o igual a "ahora"
-                return selectInfo.start >= ahora;
+                const hoy = new Date();
+                // Solo permite si la fecha de inicio es mayor o igual a hoy
+                return selectInfo.start >= hoy;
             },
 
             // Lógica al seleccionar una hora (Crear Reserva)
@@ -142,8 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // Por ahora asignamos médico fijo (luego lo hacemos dinámico) 
-                const medicoId = 1;
+                // Asignamos un medico random al paciente
+                const medicoId = Math.floor(Math.random() * 3) + 1;
                 const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, medicoId, info.startStr, info.endStr, "pendiente");
                 // Guardar en gestor 
                 gestor.agregarCita(nuevaCita); gestor.guardarEnLocalStorage();
