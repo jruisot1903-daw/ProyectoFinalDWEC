@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: system-ui, sans-serif;
+}
+
+.contenedor {
+    width: 350px;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.fila {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.label {
+    color: #666;
+}
+
+.acciones {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.acciones button {
+    flex: 1;
+    margin: 0 4px;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#btnModificar {
+    background: #1976d2;
+    color: white;
+}
+
+#btnEliminar {
+    background: #d32f2f;
+    color: white;
+}
+
+#btnVolver {
+    background: #e0e0e0;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 480px) {
+    .contenedor {
+        margin: 20px;
+        padding: 18px 16px;
+    }
+
+    .fila {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .label {
+        width: auto;
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    .acciones {
+        justify-content: center;
+    }
+
+    .acciones button {
+        flex: 1 1 100%;
+        text-align: center;
+    }
+}

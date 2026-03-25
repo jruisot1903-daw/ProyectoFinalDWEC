@@ -58,7 +58,7 @@
     }
 }
 
-/* hacemos referencia a la pagina que dejamos y a la que vamos "old" la que dejamos "new" a la que vamos*/
+/* hacemos referencia a la pagina que dejamos y a la que vamos,"old" la que dejamos "new" a la que vamos*/
 ::view-transition-old(root) {
     animation: salir 0.6s ease-in both;
 }
@@ -97,6 +97,7 @@ body {
     position: relative;
     padding: 20px;
     box-shadow: 0px 5px 5px -3px black;
+    border-radius: 5px;
 }
 
 .header>img {

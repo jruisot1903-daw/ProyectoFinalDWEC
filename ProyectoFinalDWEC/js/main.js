@@ -1,13 +1,30 @@
 import { GestorCitas } from "../js/clases/GestionaCitas.js";
 import { Cita } from "../js/clases/Cita.js";
+import { crearModalCita } from "./dom.js";
+
+const modalCita = crearModalCita();
 const gestor = new GestorCitas();
 let pacienteLogueado = null;
+let citaSeleccionada = null;
+let cita = null;
 
 let login = document.getElementById("login");
 let pass = document.getElementById("pass");
 let saludo = document.getElementById("texto");
 let err = document.getElementById("err");
 let comprobante = false;
+
+function formatearFecha(fechaStr) {
+    const fecha = new Date(fechaStr);
+    const opciones = {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    };
+    return fecha.toLocaleString("es-ES", opciones);
+}
 
 document.getElementById("btn-login-user").addEventListener("click", function () {
     const nombreIntroducido = login.value.trim().toLowerCase();
@@ -69,7 +86,10 @@ function cargarDatosIniciales() {
 
         fetch("../server/citas.json")
             .then(r => r.json())
-            .then(data => gestor.cargarCitasDesdeJSON(data))]);
+            .then(data => gestor.cargarCitasDesdeJSON(data))
+    ]).then(() => {
+        gestor.guardarEnLocalStorage(); // De esta forma hacemos que la ventana emerjente detalleCitas pueda ver la información de la cita
+    });
 }
 
 
@@ -89,11 +109,13 @@ function obtenerEventosDesdeGestor() {
 }
 
 // PRUEBAS CON API DE CALENDARIO FULLCALENDAR
+let calendar; // ← NECESARIO PARA usarlo fuera del DOMContentLoaded
+
 document.addEventListener('DOMContentLoaded', function () {
     cargarDatosIniciales().then(() => {
         const calendarEl = document.getElementById('calendar');
 
-        const calendar = new FullCalendar.Calendar(calendarEl, {
+        calendar = new FullCalendar.Calendar(calendarEl, {
             // Configuración de Vista y Lenguaje
             initialView: 'timeGridWeek', // Vista semanal con horas
             locale: 'es',                // Interfaz en español
@@ -145,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Asignamos un medico random al paciente
                 const medicoId = Math.floor(Math.random() * 3) + 1;
                 const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, medicoId, info.startStr, info.endStr, "pendiente");
+                cita = nuevaCita;
                 // Guardar en gestor 
                 gestor.agregarCita(nuevaCita); gestor.guardarEnLocalStorage();
                 // Añadir al calendario 
@@ -161,18 +184,23 @@ document.addEventListener('DOMContentLoaded', function () {
             // Lógica al hacer clic en una cita existente
             eventClick: function (info) {
                 const cita = gestor.citas.find(c => c.id == info.event.id);
+
                 if (!pacienteLogueado || cita.pacienteId !== pacienteLogueado.id) {
-                    alert("Solo puedes eliminar tus propias citas.");
+                    alert("Solo puedes gestionar tus propias citas.");
                     return;
                 }
 
-                if (confirm("¿Deseas eliminar esta reserva?")) {
-                    gestor.eliminarCita(info.event.id);
-                    gestor.guardarEnLocalStorage();
-                    info.event.remove();
-                }
-            },
+                citaSeleccionada = cita;
 
+                modalCita.setDatos(
+                    gestor.buscarPacientePorId(cita.pacienteId).getNombreCompleto(),
+                    gestor.buscarMedicoPorId(cita.medicoId).nombre,
+                    formatearFecha(cita.inicio),
+                    formatearFecha(cita.fin)
+                );
+
+                modalCita.abrir();
+            },
 
             events: obtenerEventosDesdeGestor()
         });
@@ -181,3 +209,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 });
+
+// Interacción modal 
+
+document.getElementById("btnCerrar").onclick = () => modalCita.cerrar();
+
+document.getElementById("btnEliminar").onclick = () => {
+    if (!citaSeleccionada) return;
+
+    if (confirm("¿Seguro que deseas eliminar esta cita?")) {
+        gestor.eliminarCita(citaSeleccionada.id);
+        gestor.guardarEnLocalStorage();
+
+        const evento = calendar.getEventById(citaSeleccionada.id);
+        if (evento) evento.remove();
+
+        calendar.render(); //eliminamos la cita visualmente
+
+        modalCita.cerrar();
+    }
+};
+
+document.getElementById("btnModificar").onclick = () => {
+    if (!citaSeleccionada) return;
+
+    const nuevoInicio = prompt("Nueva fecha/hora inicio:", citaSeleccionada.inicio);
+    const nuevoFin = prompt("Nueva fecha/hora fin:", citaSeleccionada.fin);
+
+    if (nuevoInicio && nuevoFin) {
+        citaSeleccionada.inicio = nuevoInicio;
+        citaSeleccionada.fin = nuevoFin;
+
+       gestor.agregarCita(cita); gestor.guardarEnLocalStorage();
+       calendar.addEvent({
+                    id: cita.id,
+                    title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(medicoId).nombre}`,
+                    start: nuevaCita.inicio,
+                    end: nuevaCita.fin,
+                    backgroundColor: "#2c3e50"
+                });
+                calendar.unselect();
+
+        const evento = calendar.getEventById(citaSeleccionada.id);
+        if (evento) {
+            evento.setStart(nuevoInicio);
+            evento.setEnd(nuevoFin);
+        }
+
+        calendar.render();
+
+        modalCita.cerrar();
+    }
+};
