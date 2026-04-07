@@ -19,5 +19,54 @@
         "apellidos": "Serrano Muñoz",
         "especialidad": "Traumatología",
         "telefono": "699887766"
+    },
+    {
+        "id": 4,
+        "nombre": "Pablo",
+        "apellidos": "Navarro Solís",
+        "especialidad": "Dermatología",
+        "telefono": "644112233"
+    },
+    {
+        "id": 5,
+        "nombre": "Lucía",
+        "apellidos": "Méndez Rico",
+        "especialidad": "Ginecología",
+        "telefono": "633556677"
+    },
+    {
+        "id": 6,
+        "nombre": "Andrés",
+        "apellidos": "Pascual Vega",
+        "especialidad": "Cardiología",
+        "telefono": "622889900"
+    },
+    {
+        "id": 7,
+        "nombre": "Marina",
+        "apellidos": "Ortega Luna",
+        "especialidad": "Oftalmología",
+        "telefono": "611001122"
+    },
+    {
+        "id": 8,
+        "nombre": "Javier",
+        "apellidos": "Sanz Ibáñez",
+        "especialidad": "Neurología",
+        "telefono": "688223344"
+    },
+    {
+        "id": 9,
+        "nombre": "Raquel",
+        "apellidos": "Heredia Sanz",
+        "especialidad": "Psiquiatría",
+        "telefono": "655998877"
+    },
+    {
+        "id": 10,
+        "nombre": "Hugo",
+        "apellidos": "Ferrer Rivas",
+        "especialidad": "Endocrinología",
+        "telefono": "677445566"
     }
 ]

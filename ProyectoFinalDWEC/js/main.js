@@ -26,6 +26,11 @@ function formatearFecha(fechaStr) {
     return fecha.toLocaleString("es-ES", opciones);
 }
 
+function formatearFechaSistema(fecha){
+    const d = new Date(fecha);
+    return d.toISOString(); // trasformamos la fecha en una cadena de texto en el formato estandar para que lo reconozca el sistema
+}
+
 document.getElementById("btn-login-user").addEventListener("click", function () {
     const nombreIntroducido = login.value.trim().toLowerCase();
     const passIntroducida = pass.value.trim();
@@ -109,7 +114,7 @@ function obtenerEventosDesdeGestor() {
 }
 
 // PRUEBAS CON API DE CALENDARIO FULLCALENDAR
-let calendar; // ← NECESARIO PARA usarlo fuera del DOMContentLoaded
+let calendar; 
 
 document.addEventListener('DOMContentLoaded', function () {
     cargarDatosIniciales().then(() => {
@@ -123,8 +128,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Control de Horarios (Agenda de Reservas)
             slotMinTime: '08:00:00',     // Hora inicio jornada
-            slotMaxTime: '20:00:00',     // Hora fin jornada
+            slotMaxTime: '21:00:00',     // Hora fin jornada
             slotDuration: '00:15:00',    // Intervalos de 15 minutos
+            snapDuration: '00:15:00',    // Obligamos al cursor salte de 15 en 15 
             allDaySlot: false,           // Quita la fila de "Todo el día"
             nowIndicator: true,          // Nos marca con una linea por donde vamos correspondiente con la hora actual
 
@@ -138,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 {
                     daysOfWeek: [1, 2, 3, 4, 5],
                     startTime: '16:00',
-                    endTime: '20:00'
+                    endTime: '21:00'
                 }
             ],
 
@@ -152,8 +158,11 @@ document.addEventListener('DOMContentLoaded', function () {
             // Bloqueamos las posibles reservas en horarios o dias que tan han pasado 
             selectAllow: function (selectInfo) {
                 const hoy = new Date();
+                const fechaFutura = selectInfo.start >= hoy;
+                const duracionMs = selectInfo.end - selectInfo.start;
+                const dentroDelTiempo = duracionMs <= 900000;
                 // Solo permite si la fecha de inicio es mayor o igual a hoy
-                return selectInfo.start >= hoy;
+                return fechaFutura && dentroDelTiempo;
             },
 
             // Lógica al seleccionar una hora (Crear Reserva)
@@ -165,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // Asignamos un medico random al paciente
-                const medicoId = Math.floor(Math.random() * 3) + 1;
+                const medicoId = Math.floor(Math.random() * 10) + 1;
                 const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, medicoId, info.startStr, info.endStr, "pendiente");
                 cita = nuevaCita;
                 // Guardar en gestor 
@@ -233,30 +242,47 @@ document.getElementById("btnEliminar").onclick = () => {
 document.getElementById("btnModificar").onclick = () => {
     if (!citaSeleccionada) return;
 
-    const nuevoInicio = prompt("Nueva fecha/hora inicio:", citaSeleccionada.inicio);
-    const nuevoFin = prompt("Nueva fecha/hora fin:", citaSeleccionada.fin);
+    // Pedimos los datos
+    const nuevoInicioStr = prompt("Nueva fecha/hora inicio (Formato: YYYY-MM-DD HH:mm):", formatearFecha(citaSeleccionada.inicio));
+    const nuevoFinStr = prompt("Nueva fecha/hora fin (Formato: YYYY-MM-DD HH:mm):", formatearFecha(citaSeleccionada.fin));
+   
+    if (nuevoInicioStr && nuevoFinStr) {
+        // Convertimos el texto del prompt a objetos Date reales
+        const fechaInicioObj = new Date(nuevoInicioStr);
+        const fechaFinObj = new Date(nuevoFinStr);
 
-    if (nuevoInicio && nuevoFin) {
-        citaSeleccionada.inicio = nuevoInicio;
-        citaSeleccionada.fin = nuevoFin;
+        console.log(fechaInicioObj);
+        console.log(fechaFinObj);
 
-       gestor.agregarCita(cita); gestor.guardarEnLocalStorage();
-       calendar.addEvent({
-                    id: cita.id,
-                    title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(medicoId).nombre}`,
-                    start: nuevaCita.inicio,
-                    end: nuevaCita.fin,
-                    backgroundColor: "#2c3e50"
-                });
-                calendar.unselect();
-
-        const evento = calendar.getEventById(citaSeleccionada.id);
-        if (evento) {
-            evento.setStart(nuevoInicio);
-            evento.setEnd(nuevoFin);
+        // Validamos que las fechas sean válidas antes de seguir
+        if (isNaN(fechaInicioObj.getTime())) {
+            alert("Formato de fecha no válido. Usa: YYYY-MM-DD HH:mm");
+            return;
         }
 
-        calendar.render();
+        // ACTUALIZAR GESTOR
+        // Buscamos la cita por ID en tu array y actualizamos sus datos
+        const citaEnArray = gestor.citas.find(c => c.id == citaSeleccionada.id);
+        if (citaEnArray) {
+            citaEnArray.inicio = fechaInicioObj.toISOString();
+            citaEnArray.fin = fechaFinObj.toISOString();
+            gestor.guardarEnLocalStorage();
+        }
+
+        // ACTUALIZAR CALENDARIO
+        const eventoViejo = calendar.getEventById(citaSeleccionada.id);
+        if (eventoViejo) {
+            eventoViejo.remove(); // Eliminamos la posición antigua de la pantalla
+        }
+
+        // Añadimos la nueva posición
+        calendar.addEvent({
+            id: citaSeleccionada.id,
+            title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(citaSeleccionada.medicoId).nombre}`,
+            start: fechaInicioObj,
+            end: fechaFinObj,
+            backgroundColor: "#2c3e50"
+        });
 
         modalCita.cerrar();
     }

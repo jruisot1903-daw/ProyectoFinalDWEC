@@ -259,6 +259,6 @@ footer img {
 }
 
 .social-icon-footer>a>img:hover {
-    transform: scale(1.1);
-    filter: brightness(0) saturate(100%) invert(54%) sepia(81%) saturate(700%) hue-rotate(60deg);
+    transform: scale(1.2);
+    filter: brightness(100%) saturate(80%) invert(54%) sepia(81%) saturate(400%) hue-rotate(60deg);
 }
