@@ -1,7 +1,5 @@
-Esta aplicacion cabe recalcar que es solo para Pacientes , vaya no tendremos problema a la hora de que inicien sesión ya que solo pueden inciar un paciente
-Los medicos solo los queremos aqui para "asignarles" un paciente a la hora que elija el enfermo.
+La aplicación contara con una pantalla principal como si fuera el inicio de una app , en la cual nos saldra una pantalla de carga y al darle nos pasara a la siguiente pagina para poder iniciar sesión y poder reservar la cita , la cual en la pagina nos saldra un calendario interactivo, solo nos dejara reservar cita en el caso de que tengamos inciado la sesión con un paciente. Una vez que reservemos la cita se nos asignara de una manera aleatoria un medico. Y al poder hacer click encima de la cita si tenemos la sesión iniciada con el mismo paciente que la reserva nos saldra una ventana emergente con la posibilidad de poder modificarla ya sea fecha / hora , eliminar la cita o simplemente cerrarlo y no hacer nada.
 
-Realizar una aplicación que realice reservas , anulaciones y modificaciones de las mismas de citas medicas y llevar un control de ellas 
 3 clases : 
 Medico --> id_med , nombre ,apellidos , especialidad , telefono.
 Cita_medica --> id_cita ,fecha_cita, hora_cita, id_med , DNI_paciente.  
