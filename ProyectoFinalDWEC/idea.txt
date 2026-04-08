@@ -8,10 +8,36 @@ Medico --> id_med , nombre ,apellidos , especialidad , telefono.
 Cita_medica --> id_cita ,fecha_cita, hora_cita, id_med , DNI_paciente.  
 Paciente --> DNI, nombre , apellidos.
 
-Los datos se almacenaran en un .JSON donde tendremos 3 para simular una "base de datos" aunque los datos de las citas que creemos no se guarden directamente en el .json ya que lo tenemos con 
-el localStorage.
+Los datos se almacenaran en un .JSON donde tendremos 3 para simular una "base de datos", tambien contaremos con un localStorage que se utilizara previamente para las practicas antes de implementar
+la modificación de el json de citas.
  
 Medicos.JSON 
-Citas_medicas.JSON
+Citas.JSON
 Pacientes.JSON
 
+Cosas que quedan por hacer : 
+
+- Tenemos que al modificar no se pueda poner horas fuera del tramo , por ejemplo si es cada 15 min no puede una cita ser desde :05 hasta :35 
+- Tenemos que comprobar que al modificar si ya exite una cita no nos deje ponerla a esa hora / dia (teniendo en cuenta si tiene o no el mismo medico, si es el mismo no se puede si no ....)
+- Tenemos que hacer que el diseño sea responsive 
+- Tenemos que cambiar el archivo dom.js para que utilice la funcion creaNodos utilizada en clase 
+- Implementación de 3 eventos
+- Cuando se modifique la cita que tambien se modifique con los datos nuevos en el json
+
+
+
+Cosas terminadas :
+
+- Creacción de todas las clases que necesitamos (Medicos,Pacientes,Cita,GestionaCitas...)
+- Creacción de todas las paginas html
+- Implementación de la API fullCalendar
+- Creacción del diseño de las paginas con css 
+- Creacción de la ventana auxiliar con modales desde JS
+- Identidad Corporativa de la junta de andalucía y del hospital de antequera
+- Creacción de los archivos .json
+- Llamadas a los .json haciendo una promesa a todos y llamandolos por fetch 
+- lectura del json de citas 
+- Añadir citas al json
+- Borrar citas del json
+- Al modificar la cita en el modal que se actualice tambien en el json
+- Creacción de localStorage

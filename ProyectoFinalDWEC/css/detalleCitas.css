@@ -31,7 +31,7 @@ h1 {
 }
 
 .label {
-    color: #666;
+    color: #525151;
 }
 
 .acciones {
@@ -62,8 +62,6 @@ h1 {
 #btnVolver {
     background: #e0e0e0;
 }
-
-/* ===== Responsive ===== */
 
 @media (max-width: 480px) {
     .contenedor {
