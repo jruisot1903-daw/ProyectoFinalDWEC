@@ -10,27 +10,25 @@ let cita = null;
 
 let login = document.getElementById("login");
 let pass = document.getElementById("pass");
+let mensajeAyuda = document.getElementById("ayudaContra");
 let saludo = document.getElementById("texto");
 let err = document.getElementById("err");
 let comprobante = false;
 let citas = [];
 
-function formatearFecha(fechaStr) {
-    const fecha = new Date(fechaStr);
-    // const opciones = {
-    //     year: "numeric",
-    //     month: "numeric",
-    //     day: "numeric",  Lo tenia en español pero me daba fallo con las fechas y a la hora de trasformarlo donde ponia el dia lo cogia como el mes y viceversa
-    //     hour: "2-digit",
-    //     minute: "2-digit"
-    // };
-    return fecha.toLocaleString('en-CA', { hour12: false }); // lo ponemos en Canada para que nos salga en el formato que queremos YYY-MM-DD HH:MM:SS ya que si no fallaba
-}
+function formatearFecha(fecha) {
+    if (!fecha) return "";
+    const d = new Date(fecha);
 
-// function formatearFechaSistema(fecha){ Esto lo utilizaba antes cuando lo tenia en español para cuando lo ponia de una forma amigable para el cliente poder trasformarlo depues para el sistema
-//     const d = new Date(fecha);  
-//     return d.toISOString(); // trasformamos la fecha en una cadena de texto en el formato estandar para que lo reconozca el sistema
-// }
+    const anio = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    const horas = String(d.getHours()).padStart(2, '0');
+    const minutos = String(d.getMinutes()).padStart(2, '0');
+    const segundos = String(d.getSeconds()).padStart(2, '0');
+
+    return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+}
 
 document.getElementById("btn-login-user").addEventListener("click", function () {
     cleanErr();
@@ -105,7 +103,7 @@ function obtenerDatosCitasJson() {
     fetch("../server/citas.json")
         .then(r => r.json())
         .then(data => {
-            citas.push(...data); 
+            citas.push(...data);
         })
         .catch(error => err.innerHTML = "El error: " + error);
 }
@@ -113,7 +111,7 @@ function obtenerDatosCitasJson() {
 async function guardarEnJson() {
     try {
         // Enviamos el array completo de citas que tiene el gestor actualmente
-        const datosAEnviar = gestor.citas; 
+        const datosAEnviar = gestor.citas;
 
         const respuesta = await fetch('../server/pintarCitas.php', { // Ponemos donde tenemos nuestro PHP
             method: 'POST',
@@ -123,20 +121,16 @@ async function guardarEnJson() {
             body: JSON.stringify(datosAEnviar)
         });
 
-        // const textoRaw = await respuesta.text(); // Primero leemos como texto para depurar
-        
-        // const resultado = JSON.parse(textoRaw);
-        // console.log("Resultado:", resultado.message);
-        
+
     } catch (error) {
-        err.innerHTML= "Error detallado:", error;
+        err.innerHTML = "Error detallado:", error;
     }
 }
 
 async function eliminarCitaJson(idCita) {
     // Filtramos el array local
     gestor.citas = gestor.citas.filter(cita => cita.id != idCita);
-    
+
     // Actualizamos LocalStorage
     gestor.guardarEnLocalStorage();
 
@@ -166,12 +160,14 @@ let calendar;
 
 document.addEventListener('DOMContentLoaded', function () {
     cleanErr();
-    
+
     obtenerDatosCitasJson(); // Llamamos a la función para que nada mas se carge la pagina tengamos los datos del json
+
 
     cargarDatosIniciales().then(() => {
         const calendarEl = document.getElementById('calendar');
 
+        
         calendar = new FullCalendar.Calendar(calendarEl, {
             // Configuración de Vista
             initialView: 'timeGridWeek', // Vista semanal con horas
@@ -242,8 +238,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     backgroundColor: "#003d21"
                 });
 
-                 guardarEnJson();// guardamos la cita en el archivo de citas.json
-                 
+                guardarEnJson();// guardamos la cita en el archivo de citas.json
+                cambiarEstado(); // cambiamos el estado de las citas que sean mas viejas del dia de hoy
                 calendar.unselect(); // Limpia la selección tras terminar
             },
 
@@ -269,14 +265,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 modalCita.abrir();
             },
 
-            
+
             events: obtenerEventosDesdeGestor()
         });
-        
+
         calendar.render();
     });
 
-   
+
 });
 
 // Interacción modal 
@@ -301,61 +297,178 @@ document.getElementById("btnEliminar").onclick = () => {
 
 document.getElementById("btnModificar").onclick = () => {
     if (!citaSeleccionada) return;
+    err.innerHTML = ""; // Limpiamos errores previos
 
-    // Pedimos los datos
-    const nuevoInicioStr = prompt("Nueva fecha/hora inicio (Formato: YYYY-MM-DD HH:mm:ss):", formatearFecha(citaSeleccionada.inicio));
-    const nuevoFinStr = prompt("Nueva fecha/hora fin (Formato: YYYY-MM-DD HH:mm:ss):", formatearFecha(citaSeleccionada.fin));
+    const nuevoInicioStr = prompt("Formato: YYYY-MM-DD HH:mm:ss", formatearFecha(citaSeleccionada.inicio));
+    const nuevoFinStr = prompt("Formato: YYYY-MM-DD HH:mm:ss", formatearFecha(citaSeleccionada.fin));
 
     if (nuevoInicioStr && nuevoFinStr) {
-        // Convertimos el texto del prompt a objetos Date
-        const fechaInicioObj = new Date(nuevoInicioStr);
-        const fechaFinObj = new Date(nuevoFinStr);
+        // 1. Validar formato visual con una Expresión Regular
+        const regexFecha = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
-        // Validamos que las fechas sean válidas antes de seguir
-        if (isNaN(fechaInicioObj.getTime()) && isNaN(fechaFinObj.getTime())) {
-            err.innerHTML = "Formato de fecha no válido. Usa: YYYY-MM-DD HH:mm:ss";
+        if (!regexFecha.test(nuevoInicioStr) || !regexFecha.test(nuevoFinStr)) {
+            err.innerHTML = "Error: El formato debe ser exactamente YYYY-MM-DD HH:mm:ss";
             return;
         }
 
-        // Actualizar Gestor
-        // Buscamos la cita por ID en tu array y actualizamos sus datos
+        const fechaInicioObj = new Date(nuevoInicioStr.replace(" ", "T")); // Reemplazo para asegurar compatibilidad con el estandar de la fecha ISO
+        const fechaFinObj = new Date(nuevoFinStr.replace(" ", "T"));
+
+        console.log(fechaInicioObj);
+        console.log(fechaFinObj);
+
+        // Validar que la fecha sea real
+        if (isNaN(fechaInicioObj.getTime()) || isNaN(fechaFinObj.getTime())) {
+            err.innerHTML = "Error: Fecha calendario no válida.";
+            return;
+        }
+
+        // Validar los 15 minutos
+        const minI = fechaInicioObj.getMinutes();
+        const minF = fechaFinObj.getMinutes();
+
+        if (minI % 15 !== 0 || minF % 15 !== 0) {
+            err.innerHTML = "Error: Los minutos deben ser 00, 15, 30 o 45.";
+            return;
+        }
+
+
+        // Validar que inicio sea antes que fin
+        if (fechaInicioObj >= fechaFinObj) {
+            err.innerHTML = "Error: La fecha de inicio debe ser anterior a la de fin.";
+            return;
+        }
+
+        // Comparamos si la cita a donde queremos moverlo tiene ya el mismo medico o si ya es la cita del mismo paciente
+
+        const tieneConsulta = gestor.citas.some(cita => {
+            if (cita.medicoId === citaSeleccionada.medicoId && cita.id !== citaSeleccionada.id) {
+
+                const inicioConsulta = new Date(cita.inicio);
+                const finConsulta = new Date(cita.fin);
+                return fechaInicioObj < finConsulta && fechaFinObj > inicioConsulta;
+            }
+            return false;
+        });
+
+        if (tieneConsulta) {
+            err.innerHTML = "Error: El médico ya tiene una cita programada en ese horario.";
+            return;
+        }
+
+        const tieneCita = gestor.citas.some(cita => {
+
+            if (cita.pacienteId === citaSeleccionada.pacienteId && cita.id !== citaSeleccionada.id) {
+                const inicioCita = new Date(cita.inicio);
+                const finCita = new Date(cita.fin);
+
+                return fechaInicioObj < finCita && fechaFinObj > inicioCita;
+            }
+            return false;
+        });
+
+        if (tieneCita) {
+            err.innerHTML = "Error: El paciente " + pacienteLogueado.nombre + " ya tiene una cita este dia.";
+            return;
+        }
+
+        // Lógica de actualización
         const citaEnArray = gestor.citas.find(c => c.id == citaSeleccionada.id);
         if (citaEnArray) {
             citaEnArray.inicio = fechaInicioObj;
             citaEnArray.fin = fechaFinObj;
+
+            // Eliminar viejo evento del calendario
+            const eventoViejo = calendar.getEventById(citaSeleccionada.id);
+            if (eventoViejo) eventoViejo.remove();
+
+            // Sincronizar cambios
+            eliminarCitaJson(citaSeleccionada.id);
             gestor.guardarEnLocalStorage();
+
+            calendar.addEvent({
+                id: citaEnArray.id,
+                title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(citaEnArray.medicoId).nombre}`,
+                start: citaEnArray.inicio,
+                end: citaEnArray.fin,
+                backgroundColor: "#003d21"
+            });
+
+            guardarEnJson();
+            modalCita.cerrar();
         }
-        const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, citaSeleccionada.medicoId, fechaInicioObj, fechaFinObj, "pendiente");
-        cita = nuevaCita;
-
-        // Actualizar Calendario
-        const eventoViejo = calendar.getEventById(citaSeleccionada.id);
-        if (eventoViejo) {
-            eliminarCitaJson(citaSeleccionada.id); // Eliminamos la cita ya que la cambiaremos por la nueva
-            eventoViejo.remove(); // Eliminamos la posición antigua de la pantalla
-        }
-
-        // Necestiamos agregar la cita y guardarlo en el localStorage porque si no al cambiar la hora o la fecha de la cita nos aparecera en pantalla el cambio pero si queremos 
-        // interactuar con la cita de nuevo nos dara fallo
-
-        gestor.agregarCita(nuevaCita); gestor.guardarEnLocalStorage();
-
-        // Añadimos la nueva posición
-        calendar.addEvent({
-            id: nuevaCita.id,
-            title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(nuevaCita.medicoId).nombre}`,
-            start: nuevaCita.inicio,
-            end: nuevaCita.fin,
-            backgroundColor: "#003d21"
-        });
-        guardarEnJson(); // guardamos la nueva cita en el .json
-        calendar.unselect();
-        
-        modalCita.cerrar();
+       
     }
-};
+    
+}
+
+
+function cambiarEstado() {
+    let hoy = new Date(); 
+    let opciones = ["cita realizada", "cita no realizada"];
+    
+    const obtenerAleatorio = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    gestor.citas.forEach(cita => {
+        let fechaCita = new Date(cita.inicio);
+        if (fechaCita < hoy && cita.estado === "pendiente") {
+            cita.estado = obtenerAleatorio(opciones);
+        }
+    });
+    
+    guardarEnJson(); 
+}
+
 
 
 function cleanErr() {
     err.innerHTML = "";
 }
+
+// Parte de los eventos sin contar el evento click
+
+document.addEventListener('mouseover', function (e) {
+    const evento = e.target.closest('.fc-event');
+    if (evento) {
+        // Generar un color hexadecimal aleatorio , el numero que nos de lo representamos en un numero hexadecimal y el padStart lo ponemos para que siempre tenga 6 caracteres
+        const colorAleatorio = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+        evento.style.backgroundColor = colorAleatorio;
+    }
+});
+
+document.addEventListener('mouseout', function (e) {
+    const evento = e.target.closest('.fc-event');
+    if (evento) {
+        evento.style.backgroundColor = '#003d21';
+    }
+});
+
+
+document.addEventListener('keyup', function (e) {
+    if (e.key === "Enter") {
+        const colorAleatorio = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+
+        // Seleccionar los elementos de FullCalendar
+        const linea = document.querySelector('.fc-timegrid-now-indicator-line');
+        const flecha = document.querySelector('.fc-timegrid-now-indicator-arrow');
+
+        if (linea && flecha) {
+            // Aplicar el color aleatorio a la línea
+            linea.style.setProperty('border-color', colorAleatorio, 'important');
+            linea.style.setProperty('box-shadow', `0 0 12px ${colorAleatorio}`, 'important');
+
+            // Aplicar el mismo color a la flecha
+            flecha.style.setProperty('border-left-color', colorAleatorio, 'important');
+        }
+    }
+});
+
+
+pass.addEventListener("focus", () => {
+    mensajeAyuda.style.display = "block";
+});
+
+
+pass.addEventListener("blur", () => {
+    mensajeAyuda.style.display = "none";
+});

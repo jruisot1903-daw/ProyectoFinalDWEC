@@ -3,25 +3,25 @@
         "id": 1,
         "pacienteId": 1,
         "medicoId": 1,
-        "inicio": "2026-03-10T09:00:00.000Z",
-        "fin": "2026-03-10T09:15:00.000Z",
-        "estado": "pendiente"
+        "inicio": "2023-10-10T09:00:00.000Z",
+        "fin": "2023-10-10T09:15:00.000Z",
+        "estado": "cita no realizada"
     },
     {
         "id": 2,
         "pacienteId": 2,
         "medicoId": 2,
-        "inicio": "2026-03-11T08:30:00.000Z",
-        "fin": "2026-03-11T08:45:00.000Z",
-        "estado": "pendiente"
+        "inicio": "2024-01-11T08:30:00.000Z",
+        "fin": "2024-01-11T08:45:00.000Z",
+        "estado": "cita realizada"
     },
     {
-        "id": 3,
-        "pacienteId": 3,
-        "medicoId": 3,
-        "inicio": "2026-03-12T11:00:00.000Z",
-        "fin": "2026-03-12T11:15:00.000Z",
-        "estado": "pendiente"
+        "id": 1775730876079,
+        "pacienteId": 1,
+        "medicoId": 6,
+        "inicio": "2025-04-09T11:00:00.000Z",
+        "fin": "2025-04-09T11:15:00.000Z",
+        "estado": "cita no realizada"
     },
     {
         "id": 4,
@@ -29,78 +29,102 @@
         "medicoId": 2,
         "inicio": "2026-03-15T16:00:00.000Z",
         "fin": "2026-03-15T16:15:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita realizada"
     },
     {
         "id": 5,
-        "pacienteId": 2,
-        "medicoId": 1,
-        "inicio": "2026-03-18T10:30:00.000Z",
-        "fin": "2026-03-18T10:45:00.000Z",
-        "estado": "pendiente"
-    },
-    {
-        "id": 1775647990559,
-        "pacienteId": 1,
-        "medicoId": 1,
-        "inicio": "2026-04-08T12:30:00.000Z",
-        "fin": "2026-04-08T12:45:00.000Z",
-        "estado": "pendiente"
-    },
-    {
-        "id": 1775648643420,
-        "pacienteId": 2,
+        "pacienteId": 7,
         "medicoId": 4,
-        "inicio": "2026-04-08T14:00:00.000Z",
-        "fin": "2026-04-08T14:15:00.000Z",
-        "estado": "pendiente"
+        "inicio": "2026-04-07T16:00:00.000Z",
+        "fin": "2026-04-07T16:15:00.000Z",
+        "estado": "cita no realizada"
     },
     {
-        "id": 1775648760929,
-        "pacienteId": 10,
-        "medicoId": 1,
-        "inicio": "2026-04-08T18:45:00.000Z",
-        "fin": "2026-04-08T19:00:00.000Z",
-        "estado": "pendiente"
-    },
-    {
-        "id": 1775648136730,
-        "pacienteId": 4,
-        "medicoId": 5,
-        "inicio": "2026-04-09T07:00:00.000Z",
-        "fin": "2026-04-09T07:15:00.000Z",
-        "estado": "pendiente"
-    },
-    {
-        "id": 1775650808097,
+        "id": 1775733176281,
         "pacienteId": 1,
-        "medicoId": 5,
-        "inicio": "2026-04-09T06:00:00.000Z",
-        "fin": "2026-04-09T06:15:00.000Z",
+        "medicoId": 6,
+        "inicio": "2026-04-09T11:30:00.000Z",
+        "fin": "2026-04-09T11:45:00.000Z",
         "estado": "pendiente"
     },
     {
-        "id": 1775651458686,
+        "id": 1775733176939,
         "pacienteId": 1,
         "medicoId": 7,
-        "inicio": "2026-04-10T08:15:00.000Z",
-        "fin": "2026-04-10T08:30:00.000Z",
+        "inicio": "2026-04-10T11:30:00.000Z",
+        "fin": "2026-04-10T11:45:00.000Z",
         "estado": "pendiente"
     },
     {
-        "id": 1775652194084,
-        "pacienteId": 3,
-        "medicoId": 1,
-        "inicio": "2026-04-08T12:45:00.000Z",
-        "fin": "2026-04-08T13:00:00.000Z",
-        "estado": "pendiente"
-    },
-    {
-        "id": 1775652208159,
-        "pacienteId": 3,
+        "id": 1775733177620,
+        "pacienteId": 1,
         "medicoId": 5,
-        "inicio": "2026-04-09T07:30:00.000Z",
-        "fin": "2026-04-09T07:45:00.000Z",
+        "inicio": "2026-04-10T10:30:00.000Z",
+        "fin": "2026-04-10T10:45:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733179283,
+        "pacienteId": 1,
+        "medicoId": 5,
+        "inicio": "2026-04-10T12:15:00.000Z",
+        "fin": "2026-04-10T12:30:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733179843,
+        "pacienteId": 1,
+        "medicoId": 10,
+        "inicio": "2026-04-10T14:15:00.000Z",
+        "fin": "2026-04-10T14:30:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733180203,
+        "pacienteId": 1,
+        "medicoId": 7,
+        "inicio": "2026-04-09T14:15:00.000Z",
+        "fin": "2026-04-09T14:30:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733180891,
+        "pacienteId": 1,
+        "medicoId": 1,
+        "inicio": "2026-04-09T16:30:00.000Z",
+        "fin": "2026-04-09T16:45:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733181491,
+        "pacienteId": 1,
+        "medicoId": 3,
+        "inicio": "2026-04-10T17:45:00.000Z",
+        "fin": "2026-04-10T18:00:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733181763,
+        "pacienteId": 1,
+        "medicoId": 10,
+        "inicio": "2026-04-09T18:15:00.000Z",
+        "fin": "2026-04-09T18:30:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733182308,
+        "pacienteId": 1,
+        "medicoId": 9,
+        "inicio": "2026-04-10T16:00:00.000Z",
+        "fin": "2026-04-10T16:15:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1775733601086,
+        "pacienteId": 2,
+        "medicoId": 1,
+        "inicio": "2026-04-10T15:15:00.000Z",
+        "fin": "2026-04-10T15:30:00.000Z",
         "estado": "pendiente"
     }
 ]

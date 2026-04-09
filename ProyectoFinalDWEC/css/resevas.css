@@ -125,6 +125,18 @@ body {
     padding: 5px;
 }
 
+#ayudaContra{
+    color: rgba(255, 255, 255, 0.555);
+    position: absolute;
+    top: 99px;
+    right: 165px;
+    font-size: small;
+    display: none;
+    background-color: rgba(128, 128, 128, 0.473);
+    padding: 2px;
+    border-radius: 5px;
+}
+
 /*****************
   BOTONES
 *****************/
@@ -145,7 +157,7 @@ body {
 }
 
 .btn:hover {
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 /*****************
@@ -156,7 +168,7 @@ body {
     font-weight: bold;
     color: var(--white);
     position: absolute;
-    top: 70%;
+    top: 66%;
     right: 30%;
 }
 

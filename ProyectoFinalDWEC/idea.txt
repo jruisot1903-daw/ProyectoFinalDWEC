@@ -8,8 +8,7 @@ Medico --> id_med , nombre ,apellidos , especialidad , telefono.
 Cita_medica --> id_cita ,fecha_cita, hora_cita, id_med , DNI_paciente.  
 Paciente --> DNI, nombre , apellidos.
 
-Los datos se almacenaran en un .JSON donde tendremos 3 para simular una "base de datos", tambien contaremos con un localStorage que se utilizara previamente para las practicas antes de implementar
-la modificación de el json de citas.
+Los datos se almacenaran en un .JSON donde tendremos 3 para simular una "base de datos", tambien contaremos con un localStorage.
  
 Medicos.JSON 
 Citas.JSON
@@ -17,14 +16,17 @@ Pacientes.JSON
 
 Cosas que quedan por hacer : 
 
-- Tenemos que al modificar no se pueda poner horas fuera del tramo , por ejemplo si es cada 15 min no puede una cita ser desde :05 hasta :35 
-- Tenemos que comprobar que al modificar si ya exite una cita no nos deje ponerla a esa hora / dia (teniendo en cuenta si tiene o no el mismo medico, si es el mismo no se puede si no ....)
-- Tenemos que hacer que el diseño sea responsive 
-- Tenemos que cambiar el archivo dom.js para que utilice la funcion creaNodos utilizada en clase 
-- Implementación de 3 eventos
-- Cuando se modifique la cita que tambien se modifique con los datos nuevos en el json
+- Tenemos que hacer que el diseño sea responsive
 
 
+/* 
+   El unico problema que tengo en si es que a la hora de guardar las horas en el .json al utilizar toLocaleString se me guarda con la hora que tenga el dispositivo la cual es dos horas adelantado
+   en comparación a la hora del meridiano y automaticamente se regula y se me guarda en el .json como si fuera la hora del meridiano pero en la pagina web a la hora de verlo me sale normal
+
+   Otro ascpecto a tener en cuenta es que cuando se crea una cita no se puede hacer click si ya existe otra ya que como al crearla se le asigna un medico " random " existe posibilidad de que
+   sea el mismo entonces por ello no se dejaría , pero al modificar la cita ya sabemos que medico que se le a asignado a esa cita entonces podemos jugar con eso y tenemos la posibilidad de 
+   poner dos citas el mismo dia a la misma hora pero si el medico que las imparte no es el mismo y si la cita no es de la misma persona
+*/
 
 Cosas terminadas :
 
@@ -41,3 +43,11 @@ Cosas terminadas :
 - Borrar citas del json
 - Al modificar la cita en el modal que se actualice tambien en el json
 - Creacción de localStorage
+- Al modificar solo nos deja tramos de cada 15 min ( :00 , :15 , :30 , :45)
+- Al modificar podemos tener mas de una cita el mismo dia pero si el medico no es el mismo en las dos citas y si el paciente no tiene ya una cita ese dia
+- eventos : 
+  - click : Por ejemplo al loogearse , al clickar sobre una cita , al hacer alguna acción sobre el modal de la cita para modificarlo
+  - mouseover y mouseout : Al pasar el raton por encima de las citas cambia a un color aleatorio y cuando sales vuelve a su color 
+  - keyup : Al darle y soltar la tecla " Enter " el color de la barra y el color de la línea se cambia aleatoriamente y al resfrescar la pagina vuelve a su color
+  - focus y blur : Cuando pones el foco encima del campo contraseña para loogearte te sale un mensaje de ayuda arriba recordandote que la contraseña es el dni y cuando le quitas el foco desaparece
+- Realización de cambio de estado aleatorio (cita realizada o cita no realizada) a las citas más antiguas que el dia de hoy 

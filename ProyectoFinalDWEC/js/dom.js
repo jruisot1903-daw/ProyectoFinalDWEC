@@ -4,50 +4,44 @@
 
 export function crearModalCita() {
 
-    const modal = document.createElement("div");
+    const modal = createNode("div");
     modal.id = "modalCita";
-    Object.assign(modal.style, {
-        position: "fixed",
-        top: "0",
-        left: "0",
-        width: "100%",
-        height: "100%",
-        background: "rgba(0,0,0,0.45)",
-        display: "none",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: "9999"
-    });
+    modal.style.position =  "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.background = "rgba(0,0,0,0.45)";
+    modal.style.display = "none";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+    modal.style.zIndex = "9999";
 
-    const contenido = document.createElement("div");
-    Object.assign(contenido.style, {
-        width: "340px",
-        background: "white",
-        padding: "20px",
-        borderRadius: "12px",
-        boxShadow: "0 8px 20px rgba(0,0,0,0.25)",
-        fontFamily: "system-ui"
-    });
+    const contenido = createNode("div");
 
-    const titulo = document.createElement("h2");
-    titulo.textContent = "Detalle de la cita";
+    contenido.style.width = "340px";
+    contenido.style.background = "white";
+    contenido.style.padding = "20px";
+    contenido.style.borderRadius = "12px";
+    contenido.style.boxShadow = "0 8px 20px rgba(0,0,0,0.25)";
+    contenido.style.fontFamily = "system-ui";
+
+    const titulo = createNode("h2","Detalle de la cita");
     titulo.style.textAlign = "center";
     contenido.appendChild(titulo);
 
     // Función para crear filas
     function fila(label, id) {
-        const f = document.createElement("div");
-        Object.assign(f.style, {
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "10px"
-        });
+        const f = createNode("div");
+        f.style.display = "flex";
+        f.style.justifyContent = "space-between";
+        f.style.marginBottom = "10px";
 
-        const l = document.createElement("span");
+        const l = createNode("span");
         l.textContent = label;
         l.style.color = "#666";
 
-        const v = document.createElement("span");
+        const v = createNode("span");
         v.id = id;
 
         f.appendChild(l);
@@ -61,25 +55,21 @@ export function crearModalCita() {
     contenido.appendChild(fila("Fin:", "mFin"));
 
     // Botones
-    const acciones = document.createElement("div");
-    Object.assign(acciones.style, {
-        display: "flex",
-        justifyContent: "space-between",
-        marginTop: "20px"
-    });
+    const acciones = createNode("div");
+
+    acciones.style.display = "flex";
+    acciones.style.justifyContent = "space-between";
+    acciones.style.marginTop = "20px";
 
     function boton(texto, color, id) {
-        const b = document.createElement("button");
+        const b = createNode("button",texto);
         b.id = id;
-        b.textContent = texto;
-        Object.assign(b.style, {
-            padding: "8px 12px",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            background: color,
-            color: "white"
-        });
+        b.style.padding = "8px 12px";
+        b.style.border = "none";
+        b.style.borderRadius = "6px";
+        b.style.cursor = "pointer";
+        b.style.background = color;
+        b.style.color = "white";
         return b;
     }
 
@@ -105,5 +95,27 @@ export function crearModalCita() {
             document.getElementById("mFin").textContent = fin;
         }
     };
+}
+
+
+function createNode(tipoNodo, tipoTexto) {
+  let nodo;
+  let nodoText;
+
+  switch (arguments.length) {
+    case 0:
+      throw "Se necesita al menos el tipo de elemento a crear.";
+      break;
+    case 1:
+      nodo = document.createElement(tipoNodo);
+      break;
+    case 2:
+      nodo = document.createElement(tipoNodo);
+      nodoText = document.createTextNode(tipoTexto);
+      nodo.appendChild(nodoText);
+      break;
+  }
+
+  return nodo;
 }
     
