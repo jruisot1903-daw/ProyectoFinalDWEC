@@ -16,16 +16,15 @@ Pacientes.JSON
 
 Cosas que quedan por hacer : 
 
-- Tenemos que hacer que el diseño sea responsive
-
+- Diseño sea responsive
 
 /* 
-   El unico problema que tengo en si es que a la hora de guardar las horas en el .json al utilizar toLocaleString se me guarda con la hora que tenga el dispositivo la cual es dos horas adelantado
-   en comparación a la hora del meridiano y automaticamente se regula y se me guarda en el .json como si fuera la hora del meridiano pero en la pagina web a la hora de verlo me sale normal
+   El unico problema que tengo en si es que a la hora de guardar las horas en el .json al utilizar toLocaleString se me guarda con la hora que tenga el dispositivo la cual es 
+   dos horas adelantado en comparación a la hora del meridiano y automaticamente se regula y se me guarda en el .json como si fuera la hora del meridiano pero en la pagina web
+   a la hora de verlo me sale normal
 
-   Otro ascpecto a tener en cuenta es que cuando se crea una cita no se puede hacer click si ya existe otra ya que como al crearla se le asigna un medico " random " existe posibilidad de que
-   sea el mismo entonces por ello no se dejaría , pero al modificar la cita ya sabemos que medico que se le a asignado a esa cita entonces podemos jugar con eso y tenemos la posibilidad de 
-   poner dos citas el mismo dia a la misma hora pero si el medico que las imparte no es el mismo y si la cita no es de la misma persona
+   al loogearte que compruebe si eres medico o eres paciente, si eres paciente solo puedes reservar la cita tal y como esta ahora , y si eres medico que te salga un listado 
+   de consultas que tienes en el dia con el nombre de los pacientes , la hora y tal 
 */
 
 Cosas terminadas :
@@ -35,6 +34,7 @@ Cosas terminadas :
 - Implementación de la API fullCalendar
 - Creacción del diseño de las paginas con css 
 - Creacción de la ventana auxiliar con modales desde JS
+- Creación de elementos del arbol DOM 
 - Identidad Corporativa de la junta de andalucía y del hospital de antequera
 - Creacción de los archivos .json
 - Llamadas a los .json haciendo una promesa a todos y llamandolos por fetch 
@@ -45,6 +45,8 @@ Cosas terminadas :
 - Creacción de localStorage
 - Al modificar solo nos deja tramos de cada 15 min ( :00 , :15 , :30 , :45)
 - Al modificar podemos tener mas de una cita el mismo dia pero si el medico no es el mismo en las dos citas y si el paciente no tiene ya una cita ese dia
+- Al modificar una cita depues de cambiarle el dia o la fecha que nos siga dejando poder pinchar en ella para editarla
+
 - eventos : 
   - click : Por ejemplo al loogearse , al clickar sobre una cita , al hacer alguna acción sobre el modal de la cita para modificarlo
   - mouseover y mouseout : Al pasar el raton por encima de las citas cambia a un color aleatorio y cuando sales vuelve a su color 

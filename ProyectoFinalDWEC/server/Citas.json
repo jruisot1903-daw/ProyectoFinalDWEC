@@ -1,21 +1,5 @@
 [
     {
-        "id": 1,
-        "pacienteId": 1,
-        "medicoId": 1,
-        "inicio": "2023-10-10T09:00:00.000Z",
-        "fin": "2023-10-10T09:15:00.000Z",
-        "estado": "cita no realizada"
-    },
-    {
-        "id": 2,
-        "pacienteId": 2,
-        "medicoId": 2,
-        "inicio": "2024-01-11T08:30:00.000Z",
-        "fin": "2024-01-11T08:45:00.000Z",
-        "estado": "cita realizada"
-    },
-    {
         "id": 1775730876079,
         "pacienteId": 1,
         "medicoId": 6,
@@ -24,28 +8,12 @@
         "estado": "cita no realizada"
     },
     {
-        "id": 4,
-        "pacienteId": 1,
-        "medicoId": 2,
-        "inicio": "2026-03-15T16:00:00.000Z",
-        "fin": "2026-03-15T16:15:00.000Z",
-        "estado": "cita realizada"
-    },
-    {
-        "id": 5,
-        "pacienteId": 7,
-        "medicoId": 4,
-        "inicio": "2026-04-07T16:00:00.000Z",
-        "fin": "2026-04-07T16:15:00.000Z",
-        "estado": "cita no realizada"
-    },
-    {
         "id": 1775733176281,
         "pacienteId": 1,
         "medicoId": 6,
         "inicio": "2026-04-09T11:30:00.000Z",
         "fin": "2026-04-09T11:45:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita no realizada"
     },
     {
         "id": 1775733176939,
@@ -53,7 +21,7 @@
         "medicoId": 7,
         "inicio": "2026-04-10T11:30:00.000Z",
         "fin": "2026-04-10T11:45:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita realizada"
     },
     {
         "id": 1775733177620,
@@ -61,7 +29,7 @@
         "medicoId": 5,
         "inicio": "2026-04-10T10:30:00.000Z",
         "fin": "2026-04-10T10:45:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita realizada"
     },
     {
         "id": 1775733179283,
@@ -69,7 +37,7 @@
         "medicoId": 5,
         "inicio": "2026-04-10T12:15:00.000Z",
         "fin": "2026-04-10T12:30:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita no realizada"
     },
     {
         "id": 1775733179843,
@@ -77,7 +45,7 @@
         "medicoId": 10,
         "inicio": "2026-04-10T14:15:00.000Z",
         "fin": "2026-04-10T14:30:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita no realizada"
     },
     {
         "id": 1775733180203,
@@ -85,7 +53,7 @@
         "medicoId": 7,
         "inicio": "2026-04-09T14:15:00.000Z",
         "fin": "2026-04-09T14:30:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita no realizada"
     },
     {
         "id": 1775733180891,
@@ -93,7 +61,7 @@
         "medicoId": 1,
         "inicio": "2026-04-09T16:30:00.000Z",
         "fin": "2026-04-09T16:45:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita no realizada"
     },
     {
         "id": 1775733181491,
@@ -101,7 +69,7 @@
         "medicoId": 3,
         "inicio": "2026-04-10T17:45:00.000Z",
         "fin": "2026-04-10T18:00:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita no realizada"
     },
     {
         "id": 1775733181763,
@@ -109,7 +77,7 @@
         "medicoId": 10,
         "inicio": "2026-04-09T18:15:00.000Z",
         "fin": "2026-04-09T18:30:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita realizada"
     },
     {
         "id": 1775733182308,
@@ -117,7 +85,7 @@
         "medicoId": 9,
         "inicio": "2026-04-10T16:00:00.000Z",
         "fin": "2026-04-10T16:15:00.000Z",
-        "estado": "pendiente"
+        "estado": "cita realizada"
     },
     {
         "id": 1775733601086,
@@ -125,6 +93,46 @@
         "medicoId": 1,
         "inicio": "2026-04-10T15:15:00.000Z",
         "fin": "2026-04-10T15:30:00.000Z",
+        "estado": "cita realizada"
+    },
+    {
+        "id": 1777375378288,
+        "pacienteId": 1,
+        "medicoId": 1,
+        "inicio": "2026-04-28T12:15:00.000Z",
+        "fin": "2026-04-28T12:30:00.000Z",
+        "estado": "cita no realizada"
+    },
+    {
+        "id": 1777377596711,
+        "pacienteId": 2,
+        "medicoId": 3,
+        "inicio": "2026-04-28T12:15:00.000Z",
+        "fin": "2026-04-28T12:30:00.000Z",
+        "estado": "cita no realizada"
+    },
+    {
+        "id": 1777378604826,
+        "pacienteId": 1,
+        "medicoId": 3,
+        "inicio": "2026-04-28T12:45:00.000Z",
+        "fin": "2026-04-28T13:00:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1777378667113,
+        "pacienteId": 2,
+        "medicoId": 8,
+        "inicio": "2026-04-29T12:45:00.000Z",
+        "fin": "2026-04-29T13:00:00.000Z",
+        "estado": "pendiente"
+    },
+    {
+        "id": 1777378704770,
+        "pacienteId": 4,
+        "medicoId": 8,
+        "inicio": "2026-04-28T12:45:00.000Z",
+        "fin": "2026-04-28T13:00:00.000Z",
         "estado": "pendiente"
     }
 ]

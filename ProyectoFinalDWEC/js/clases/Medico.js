@@ -1,8 +1,9 @@
 export class Medico {
-    constructor(id_med, nombre, apellidos, especialidad, telefono) {
+    constructor(id_med, nombre, apellidos,dni, especialidad, telefono) {
         this.id_med = id_med;
         this.nombre = nombre;
         this.apellidos = apellidos;
+        this.dni = dni;
         this.especialidad = especialidad;
         this.telefono = telefono;
     }

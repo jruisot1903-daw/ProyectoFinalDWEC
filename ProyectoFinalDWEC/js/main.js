@@ -45,6 +45,11 @@ document.getElementById("btn-login-user").addEventListener("click", function () 
         p.nombre.toLowerCase() === nombreIntroducido
     );
 
+    const medico = gestor.medicos.find(m => 
+        m.nombre.toLowerCase() == nombreIntroducido
+    );
+
+
     if (!paciente) {
         err.innerHTML = "Este usuario no existe en el sistema";
         return;
@@ -146,7 +151,7 @@ function obtenerEventosDesdeGestor() {
         const medico = gestor.buscarMedicoPorId(c.medicoId);
 
         return {
-            id: c.id,
+            id: String(c.id),
             title: `${paciente?.nombre || "Paciente"} - ${medico?.nombre || "Médico"}`,
             start: c.inicio,
             end: c.fin,
@@ -167,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
     cargarDatosIniciales().then(() => {
         const calendarEl = document.getElementById('calendar');
 
-        
+
         calendar = new FullCalendar.Calendar(calendarEl, {
             // Configuración de Vista
             initialView: 'timeGridWeek', // Vista semanal con horas
@@ -295,27 +300,25 @@ document.getElementById("btnEliminar").onclick = () => {
     }
 };
 
-document.getElementById("btnModificar").onclick = () => {
+document.getElementById("btnModificar").onclick = async () => {
     if (!citaSeleccionada) return;
     err.innerHTML = ""; // Limpiamos errores previos
 
+    // Pedir nuevos datos al usuario
     const nuevoInicioStr = prompt("Formato: YYYY-MM-DD HH:mm:ss", formatearFecha(citaSeleccionada.inicio));
     const nuevoFinStr = prompt("Formato: YYYY-MM-DD HH:mm:ss", formatearFecha(citaSeleccionada.fin));
 
     if (nuevoInicioStr && nuevoFinStr) {
-        // 1. Validar formato visual con una Expresión Regular
+        // Validar formato visual con Expresión Regular
         const regexFecha = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
-
         if (!regexFecha.test(nuevoInicioStr) || !regexFecha.test(nuevoFinStr)) {
             err.innerHTML = "Error: El formato debe ser exactamente YYYY-MM-DD HH:mm:ss";
             return;
         }
 
-        const fechaInicioObj = new Date(nuevoInicioStr.replace(" ", "T")); // Reemplazo para asegurar compatibilidad con el estandar de la fecha ISO
+        // Convertir strings a objetos Date
+        const fechaInicioObj = new Date(nuevoInicioStr.replace(" ", "T"));
         const fechaFinObj = new Date(nuevoFinStr.replace(" ", "T"));
-
-        console.log(fechaInicioObj);
-        console.log(fechaFinObj);
 
         // Validar que la fecha sea real
         if (isNaN(fechaInicioObj.getTime()) || isNaN(fechaFinObj.getTime())) {
@@ -323,15 +326,11 @@ document.getElementById("btnModificar").onclick = () => {
             return;
         }
 
-        // Validar los 15 minutos
-        const minI = fechaInicioObj.getMinutes();
-        const minF = fechaFinObj.getMinutes();
-
-        if (minI % 15 !== 0 || minF % 15 !== 0) {
+        // Validar intervalos de 15 minutos
+        if (fechaInicioObj.getMinutes() % 15 !== 0 || fechaFinObj.getMinutes() % 15 !== 0) {
             err.innerHTML = "Error: Los minutos deben ser 00, 15, 30 o 45.";
             return;
         }
-
 
         // Validar que inicio sea antes que fin
         if (fechaInicioObj >= fechaFinObj) {
@@ -339,74 +338,71 @@ document.getElementById("btnModificar").onclick = () => {
             return;
         }
 
-        // Comparamos si la cita a donde queremos moverlo tiene ya el mismo medico o si ya es la cita del mismo paciente
-
+        // Validar que el médico no tiene una consulta ese mismo dia
         const tieneConsulta = gestor.citas.some(cita => {
             if (cita.medicoId === citaSeleccionada.medicoId && cita.id !== citaSeleccionada.id) {
-
-                const inicioConsulta = new Date(cita.inicio);
-                const finConsulta = new Date(cita.fin);
-                return fechaInicioObj < finConsulta && fechaFinObj > inicioConsulta;
+                const inicioC = new Date(cita.inicio);
+                const finC = new Date(cita.fin);
+                return fechaInicioObj < finC && fechaFinObj > inicioC;
             }
             return false;
         });
 
         if (tieneConsulta) {
-            err.innerHTML = "Error: El médico ya tiene una cita programada en ese horario.";
+            err.innerHTML = "Error: El médico ya tiene una cita en ese horario.";
             return;
         }
 
+        // Validar que el usuario no tiene una cita ese mismo día
         const tieneCita = gestor.citas.some(cita => {
-
             if (cita.pacienteId === citaSeleccionada.pacienteId && cita.id !== citaSeleccionada.id) {
-                const inicioCita = new Date(cita.inicio);
-                const finCita = new Date(cita.fin);
-
-                return fechaInicioObj < finCita && fechaFinObj > inicioCita;
+                const inicioP = new Date(cita.inicio);
+                const finP = new Date(cita.fin);
+                return fechaInicioObj < finP && fechaFinObj > inicioP;
             }
             return false;
         });
 
         if (tieneCita) {
-            err.innerHTML = "Error: El paciente " + pacienteLogueado.nombre + " ya tiene una cita este dia.";
+            err.innerHTML = `Error: El paciente ${pacienteLogueado.nombre} ya tiene otra cita en este horario.`;
             return;
         }
 
-        // Lógica de actualización
+        // APLICAR CAMBIOS
+        // Buscamos la referencia real en el array del gestor
         const citaEnArray = gestor.citas.find(c => c.id == citaSeleccionada.id);
+
         if (citaEnArray) {
-            citaEnArray.inicio = fechaInicioObj;
-            citaEnArray.fin = fechaFinObj;
+            // Actualizamos el objeto del gestor (en formato ISO String para el JSON)
+            citaEnArray.inicio = fechaInicioObj.toISOString();
+            citaEnArray.fin = fechaFinObj.toISOString();
 
-            // Eliminar viejo evento del calendario
-            const eventoViejo = calendar.getEventById(citaSeleccionada.id);
-            if (eventoViejo) eventoViejo.remove();
+            // Actualizamos el calendario visualmente
+            const eventoCalendario = calendar.getEventById(citaSeleccionada.id);
+            if (eventoCalendario) {
+                eventoCalendario.setDates(fechaInicioObj, fechaFinObj);
+            }
 
-            // Sincronizar cambios
-            eliminarCitaJson(citaSeleccionada.id);
+            // Guardar y Sincronizar
             gestor.guardarEnLocalStorage();
+            await guardarEnJson();
 
-            calendar.addEvent({
-                id: citaEnArray.id,
-                title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(citaEnArray.medicoId).nombre}`,
-                start: citaEnArray.inicio,
-                end: citaEnArray.fin,
-                backgroundColor: "#003d21"
-            });
-
-            guardarEnJson();
             modalCita.cerrar();
+
+            // Refrescar la referencia global para el próximo click
+            citaSeleccionada = citaEnArray;
+
+            // forzar un pequeño refresco visual
+            calendar.render();
         }
-       
     }
-    
-}
+};
 
 
 function cambiarEstado() {
-    let hoy = new Date(); 
+    let hoy = new Date();
     let opciones = ["cita realizada", "cita no realizada"];
-    
+
     const obtenerAleatorio = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     gestor.citas.forEach(cita => {
@@ -415,8 +411,8 @@ function cambiarEstado() {
             cita.estado = obtenerAleatorio(opciones);
         }
     });
-    
-    guardarEnJson(); 
+
+    guardarEnJson();
 }
 
 
