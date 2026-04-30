@@ -2,179 +2,199 @@ import { GestorCitas } from "../js/clases/GestionaCitas.js";
 import { Cita } from "../js/clases/Cita.js";
 import { crearModalCita } from "./dom.js";
 
+// --- Inicialización y Variables Globales ---
 const modalCita = crearModalCita();
 const gestor = new GestorCitas();
 let pacienteLogueado = null;
 let citaSeleccionada = null;
-let cita = null;
+let calendar;
 
-let login = document.getElementById("login");
-let pass = document.getElementById("pass");
-let mensajeAyuda = document.getElementById("ayudaContra");
-let saludo = document.getElementById("texto");
-let err = document.getElementById("err");
+const login = document.getElementById("login");
+const pass = document.getElementById("pass");
+const mensajeAyuda = document.getElementById("ayudaContra");
+const saludo = document.getElementById("texto");
+const err = document.getElementById("err");
 let comprobante = false;
-let citas = [];
+let rolLogeado = null;
+
+// --- Funciones de Utilidad ---
 
 function formatearFecha(fecha) {
     if (!fecha) return "";
     const d = new Date(fecha);
-
     const anio = d.getFullYear();
     const mes = String(d.getMonth() + 1).padStart(2, '0');
     const dia = String(d.getDate()).padStart(2, '0');
     const horas = String(d.getHours()).padStart(2, '0');
     const minutos = String(d.getMinutes()).padStart(2, '0');
     const segundos = String(d.getSeconds()).padStart(2, '0');
-
     return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
 }
+
+function cleanErr() {
+    err.innerHTML = "";
+}
+
+// --- Lógica de Médicos: Ver Agenda ---
+
+function mostrarAgendaMedico(fechaStr) {
+    const agenda = gestor.citas.filter(c => {
+        return String(c.medicoId) === String(pacienteLogueado.id) && c.inicio.startsWith(fechaStr);
+    });
+
+    if (agenda.length === 0) {
+        alert(`No hay citas programadas para el día ${fechaStr}`);
+        return;
+    }
+
+    let listado = `AGENDA DEL DÍA ${fechaStr}:\n\n`;
+    agenda.sort((a, b) => new Date(a.inicio) - new Date(b.inicio)).forEach(c => {
+        const p = gestor.buscarPacientePorId(c.pacienteId);
+        const hora = c.inicio.split("T")[1].substring(0, 5);
+        listado += `• ${hora}h - Paciente: ${p ? p.getNombreCompleto() : "N/A"} (${c.estado})\n`;
+    });
+
+    alert(listado);
+}
+
+// --- Gestión de Datos ---
+
+async function cargarDatosIniciales() {
+    try {
+        await Promise.all([
+            fetch("../server/pacientes.json").then(r => r.json()).then(data => gestor.cargarPacientesDesdeJSON(data)),
+            fetch("../server/medicos.json").then(r => r.json()).then(data => gestor.cargarMedicosDesdeJSON(data)),
+            fetch("../server/citas.json").then(r => r.json()).then(data => gestor.cargarCitasDesdeJSON(data))
+        ]);
+        gestor.guardarEnLocalStorage();
+    } catch (e) {
+        console.error("Error cargando archivos JSON", e);
+    }
+}
+
+async function guardarEnJson() {
+    try {
+        await fetch('../server/pintarCitas.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(gestor.citas)
+        });
+    } catch (error) {
+        err.innerHTML = "Error al sincronizar con el servidor.";
+    }
+}
+
+// Hacemos que no nos salga nada sin logearnos y que al logearnos con usuario podamos ver nuestras citas
+function obtenerEventosDesdeGestor() {
+    if (!comprobante || !pacienteLogueado) return [];
+
+    let citasAMostrar = [];
+
+    // Detectamos el ID del usuario logueado (sea paciente o médico)
+    // Usamos || para buscar nombres alternativos si .id falla
+    const idLogueado = String(pacienteLogueado.id || pacienteLogueado.idMedico || "");
+
+    console.log("Filtrando para el ID:", idLogueado, "con Rol:", rolLogeado);
+
+    if (rolLogeado === "medico") {
+        // Filtramos: el medicoId de la cita debe ser igual al ID del médico logueado
+        citasAMostrar = gestor.citas.filter(c => String(c.medicoId) === idLogueado);
+    } else if (rolLogeado === "paciente") {
+        // El pacienteId de la cita debe ser igual al ID del paciente logueado
+        citasAMostrar = gestor.citas.filter(c => String(c.pacienteId) === idLogueado);
+    }
+
+    // Mapeamos a formato FullCalendar
+    return citasAMostrar.map(c => {
+        const paciente = gestor.buscarPacientePorId(c.pacienteId);
+        const medico = gestor.buscarMedicoPorId(c.medicoId);
+        const yaPaso = new Date(c.inicio) < new Date();
+
+        return {
+            id: String(c.id),
+            title: `${paciente?.nombre || "P"} - ${medico?.nombre || "M"}`,
+            start: c.inicio,
+            end: c.fin,
+            backgroundColor: yaPaso ? "#003d21" : "#006e3b",
+            borderColor: yaPaso ? "#666" : "#000",
+            textColor: "white"
+        };
+    });
+}
+
+// --- Autenticación ---
 
 document.getElementById("btn-login-user").addEventListener("click", function () {
     cleanErr();
     const nombreIntroducido = login.value.trim().toLowerCase();
     const passIntroducida = pass.value.trim();
 
-    if (nombreIntroducido === "" || passIntroducida === "") {
+    if (!nombreIntroducido || !passIntroducida) {
         err.innerHTML = "Los campos no pueden estar vacíos";
-        saludo.innerHTML = "";
-        return;
-    }
-    // Buscar paciente por nombre 
-    const paciente = gestor.pacientes.find(p =>
-        p.nombre.toLowerCase() === nombreIntroducido
-    );
-
-    const medico = gestor.medicos.find(m => 
-        m.nombre.toLowerCase() == nombreIntroducido
-    );
-
-
-    if (!paciente) {
-        err.innerHTML = "Este usuario no existe en el sistema";
         return;
     }
 
-    // Usamos el DNI como contraseña 
-    if (paciente.dni !== passIntroducida) {
+    const paciente = gestor.pacientes.find(p => p.nombre.toLowerCase() === nombreIntroducido);
+    const medico = gestor.medicos.find(m => m.nombre.toLowerCase() === nombreIntroducido);
+
+    let usuarioEncontrado = null;
+
+    if (paciente) {
+        rolLogeado = "paciente";
+        usuarioEncontrado = paciente;
+    } else if (medico) {
+        rolLogeado = "medico";
+        usuarioEncontrado = medico;
+    } else {
+        err.innerHTML = "Usuario no registrado";
+        return;
+    }
+
+    if (usuarioEncontrado.dni !== passIntroducida) {
         err.innerHTML = "Contraseña incorrecta";
         return;
     }
 
-    // Login correcto 
-    pacienteLogueado = paciente;
+    pacienteLogueado = usuarioEncontrado;
     comprobante = true;
-    err.innerHTML = "";
-    saludo.innerHTML = "Bienvenid@: " + paciente.getNombreCompleto();
+
+    const nombreDisplay = rolLogeado === "paciente" ? pacienteLogueado.getNombreCompleto() : `Dr. ${pacienteLogueado.getNombreCompleto()}`;
+    saludo.innerHTML = `Bienvenid@ (${rolLogeado}): ${nombreDisplay}`;
+
+    // REFRESCAR CALENDARIO AL LOGUEAR
+    if (calendar) {
+        calendar.setOption('selectable', rolLogeado === "paciente");
+        calendar.removeAllEvents();
+        calendar.addEventSource(obtenerEventosDesdeGestor());
+    }
 });
 
 document.getElementById("btn-logout").addEventListener("click", function () {
     if (comprobante) {
-        saludo.innerHTML = pacienteLogueado.nombre + " estás saliendo...";
-        setTimeout(function () {
+        saludo.innerHTML = "Cerrando sesión...";
+        setTimeout(() => {
+            pacienteLogueado = null;
+            rolLogeado = null;
+            comprobante = false;
             saludo.innerHTML = "";
-            err.innerHTML = "";
             login.value = "";
             pass.value = "";
-            comprobante = false;
-            pacienteLogueado = null;
+            if (calendar) {
+                calendar.setOption('selectable', false);
+                calendar.removeAllEvents();
+            }
         }, 500);
-    } else {
-        err.innerHTML = "No puedes salir si no has iniciado sesión";
     }
 });
 
-
-function cargarDatosIniciales() {
-    return Promise.all([
-        fetch("../server/pacientes.json")
-            .then(r => r.json())
-            .then(data => gestor.cargarPacientesDesdeJSON(data)),
-
-        fetch("../server/medicos.json")
-            .then(r => r.json())
-            .then(data => gestor.cargarMedicosDesdeJSON(data)),
-
-        fetch("../server/citas.json")
-            .then(r => r.json())
-            .then(data => gestor.cargarCitasDesdeJSON(data))
-    ]).then(() => {
-        gestor.guardarEnLocalStorage(); // De esta forma hacemos que la ventana emerjente detalleCitas pueda ver la información de la cita
-    });
-}
-
-
-function obtenerDatosCitasJson() {
-    fetch("../server/citas.json")
-        .then(r => r.json())
-        .then(data => {
-            citas.push(...data);
-        })
-        .catch(error => err.innerHTML = "El error: " + error);
-}
-
-async function guardarEnJson() {
-    try {
-        // Enviamos el array completo de citas que tiene el gestor actualmente
-        const datosAEnviar = gestor.citas;
-
-        const respuesta = await fetch('../server/pintarCitas.php', { // Ponemos donde tenemos nuestro PHP
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(datosAEnviar)
-        });
-
-
-    } catch (error) {
-        err.innerHTML = "Error detallado:", error;
-    }
-}
-
-async function eliminarCitaJson(idCita) {
-    // Filtramos el array local
-    gestor.citas = gestor.citas.filter(cita => cita.id != idCita);
-
-    // Actualizamos LocalStorage
-    gestor.guardarEnLocalStorage();
-
-    // Enviamos el nuevo array al servidor para que pise el JSON
-    await guardarEnJson();
-}
-
-
-
-function obtenerEventosDesdeGestor() {
-    return gestor.citas.map(c => {
-        const paciente = gestor.buscarPacientePorId(c.pacienteId);
-        const medico = gestor.buscarMedicoPorId(c.medicoId);
-
-        return {
-            id: String(c.id),
-            title: `${paciente?.nombre || "Paciente"} - ${medico?.nombre || "Médico"}`,
-            start: c.inicio,
-            end: c.fin,
-            backgroundColor: "#003d21"
-        };
-    });
-}
-
-// Pruebas con API de calendario FullCalendar
-let calendar;
+// --- Calendario FullCalendar ---
 
 document.addEventListener('DOMContentLoaded', function () {
-    cleanErr();
-
-    obtenerDatosCitasJson(); // Llamamos a la función para que nada mas se carge la pagina tengamos los datos del json
-
-
     cargarDatosIniciales().then(() => {
         const calendarEl = document.getElementById('calendar');
 
-
         calendar = new FullCalendar.Calendar(calendarEl, {
-            // Configuración de Vista
+             // Configuración de Vista
             initialView: 'timeGridWeek', // Vista semanal con horas
             locale: 'es',                // Interfaz en español
             firstDay: 1,                 // Empieza en Lunes
@@ -208,22 +228,21 @@ document.addEventListener('DOMContentLoaded', function () {
             editable: false,              // No Permite mover citas ya creadas
             selectConstraint: 'businessHours', // Solos las nos permite las horas que hayamos dicho que trabajamos
 
-            // Bloqueamos las posibles reservas en horarios o dias que tan han pasado 
-            selectAllow: function (selectInfo) {
+            selectAllow: function (info) {
                 const hoy = new Date();
-                const fechaFutura = selectInfo.start >= hoy;
-                const duracionMs = selectInfo.end - selectInfo.start;
-                const dentroDelTiempo = duracionMs <= 900000;
-                // Solo permite si la fecha de inicio es mayor o igual a hoy y ya no nos permite a la hora de hacer click en una casilla para crear la cita poder desplazar el rato y coger 
-                // más tramo horario del que deberíamos coger
-                return fechaFutura && dentroDelTiempo;
+                return info.start >= hoy && (info.end - info.start <= 900000);
+            },
+            dateClick: function (info) {
+                if (rolLogeado === "medico") {
+                    mostrarAgendaMedico(info.dateStr.split("T")[0]);
+                }
             },
 
             // Crear Reserva
             select: function (info) {
                 cleanErr();
-                if (!pacienteLogueado) {
-                    err.innerHTML = "Debes iniciar sesión para reservar.";
+                if (rolLogeado !== "paciente") {
+                    err.innerHTML = "Solo los pacientes pueden reservar.";
                     calendar.unselect();
                     return;
                 }
@@ -231,197 +250,118 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Asignamos un medico random al paciente
                 const medicoId = Math.floor(Math.random() * 10) + 1;
                 const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, medicoId, info.startStr, info.endStr, "pendiente");
-                cita = nuevaCita;
+
                 // Guardar en gestor 
-                gestor.agregarCita(nuevaCita); gestor.guardarEnLocalStorage();
+
+                gestor.agregarCita(nuevaCita);
+                gestor.guardarEnLocalStorage();
+
                 // Añadir al calendario 
+
                 calendar.addEvent({
-                    id: nuevaCita.id,
+                    id: String(nuevaCita.id),
                     title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(medicoId).nombre}`,
                     start: nuevaCita.inicio,
                     end: nuevaCita.fin,
                     backgroundColor: "#003d21"
                 });
 
-                guardarEnJson();// guardamos la cita en el archivo de citas.json
-                cambiarEstado(); // cambiamos el estado de las citas que sean mas viejas del dia de hoy
+                guardarEnJson(); // guardamos la cita en el archivo de citas.json
                 calendar.unselect(); // Limpia la selección tras terminar
             },
 
-            // Lógica al hacer clic en una cita existente
             eventClick: function (info) {
                 cleanErr();
-                const cita = gestor.citas.find(c => c.id == info.event.id);
+                const cita = gestor.citas.find(c => String(c.id) === String(info.event.id));
 
-                if (!pacienteLogueado || cita.pacienteId !== pacienteLogueado.id) {
-                    err.innerHTML = "Solo puedes gestionar tus propias citas.";
+                if (!cita) return;
+
+                // VALIDACIÓN DE PERMISOS 
+                let tienePermiso = false;
+                const idActivo = String(pacienteLogueado.id);
+
+                if (rolLogeado === "medico") {
+                    tienePermiso = (String(cita.medicoId) === idActivo);
+                } else if (rolLogeado === "paciente") {
+                    tienePermiso = (String(cita.pacienteId) === idActivo);
+                }
+
+                if (!tienePermiso) {
+                    err.innerHTML = "No tienes permiso para gestionar esta cita.";
                     return;
                 }
 
                 citaSeleccionada = cita;
+                const nombrePaciente = gestor.buscarPacientePorId(cita.pacienteId)?.getNombreCompleto();
+                const nombreMedico = gestor.buscarMedicoPorId(cita.medicoId)?.getNombreCompleto();
 
-                modalCita.setDatos(
-                    gestor.buscarPacientePorId(cita.pacienteId).getNombreCompleto(),
-                    gestor.buscarMedicoPorId(cita.medicoId).nombre,
-                    formatearFecha(cita.inicio),
-                    formatearFecha(cita.fin)
-                );
-
+                modalCita.setDatos(nombrePaciente, nombreMedico, formatearFecha(cita.inicio), formatearFecha(cita.fin));
                 modalCita.abrir();
             },
-
-
-            events: obtenerEventosDesdeGestor()
+            events: [] // Se cargan al hacer login
         });
 
         calendar.render();
     });
-
-
 });
 
-// Interacción modal 
+// --- Acciones del Modal ---
 
 document.getElementById("btnCerrar").onclick = () => modalCita.cerrar();
 
-document.getElementById("btnEliminar").onclick = () => {
+document.getElementById("btnEliminar").onclick = async () => {
     if (!citaSeleccionada) return;
-
     if (confirm("¿Seguro que deseas eliminar esta cita?")) {
         gestor.eliminarCita(citaSeleccionada.id);
         gestor.guardarEnLocalStorage();
-
-        const evento = calendar.getEventById(citaSeleccionada.id);
+        const evento = calendar.getEventById(String(citaSeleccionada.id));
         if (evento) evento.remove();
-        eliminarCitaJson(citaSeleccionada.id); //eliminamos la cita "vieja" 
-        calendar.render(); //eliminamos la cita visualmente
-
+        await guardarEnJson();
         modalCita.cerrar();
     }
 };
 
 document.getElementById("btnModificar").onclick = async () => {
     if (!citaSeleccionada) return;
-    err.innerHTML = ""; // Limpiamos errores previos
+    cleanErr();
 
-    // Pedir nuevos datos al usuario
-    const nuevoInicioStr = prompt("Formato: YYYY-MM-DD HH:mm:ss", formatearFecha(citaSeleccionada.inicio));
-    const nuevoFinStr = prompt("Formato: YYYY-MM-DD HH:mm:ss", formatearFecha(citaSeleccionada.fin));
+    if (rolLogeado === "medico") {
+        const nuevoEstado = prompt("Nuevo estado (realizada/no realizada/pendiente):", citaSeleccionada.estado);
+        if (nuevoEstado) {
+            citaSeleccionada.estado = nuevoEstado;
+            gestor.guardarEnLocalStorage();
+            await guardarEnJson();
+            modalCita.cerrar();
+        }
+        return;
+    }
+
+    // Lógica de modificación para pacientes...
+    const nuevoInicioStr = prompt("Nuevo inicio (YYYY-MM-DD HH:mm:ss):", formatearFecha(citaSeleccionada.inicio));
+    const nuevoFinStr = prompt("Nuevo fin (YYYY-MM-DD HH:mm:ss):", formatearFecha(citaSeleccionada.fin));
 
     if (nuevoInicioStr && nuevoFinStr) {
-        // Validar formato visual con Expresión Regular
-        const regexFecha = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
-        if (!regexFecha.test(nuevoInicioStr) || !regexFecha.test(nuevoFinStr)) {
-            err.innerHTML = "Error: El formato debe ser exactamente YYYY-MM-DD HH:mm:ss";
-            return;
-        }
-
-        // Convertir strings a objetos Date
         const fechaInicioObj = new Date(nuevoInicioStr.replace(" ", "T"));
         const fechaFinObj = new Date(nuevoFinStr.replace(" ", "T"));
 
-        // Validar que la fecha sea real
-        if (isNaN(fechaInicioObj.getTime()) || isNaN(fechaFinObj.getTime())) {
-            err.innerHTML = "Error: Fecha calendario no válida.";
+        if (isNaN(fechaInicioObj.getTime()) || fechaInicioObj >= fechaFinObj) {
+            err.innerHTML = "Fechas inválidas.";
             return;
         }
 
-        // Validar intervalos de 15 minutos
-        if (fechaInicioObj.getMinutes() % 15 !== 0 || fechaFinObj.getMinutes() % 15 !== 0) {
-            err.innerHTML = "Error: Los minutos deben ser 00, 15, 30 o 45.";
-            return;
-        }
+        citaSeleccionada.inicio = fechaInicioObj.toISOString();
+        citaSeleccionada.fin = fechaFinObj.toISOString();
 
-        // Validar que inicio sea antes que fin
-        if (fechaInicioObj >= fechaFinObj) {
-            err.innerHTML = "Error: La fecha de inicio debe ser anterior a la de fin.";
-            return;
-        }
+        const ev = calendar.getEventById(String(citaSeleccionada.id));
+        if (ev) ev.setDates(fechaInicioObj, fechaFinObj);
 
-        // Validar que el médico no tiene una consulta ese mismo dia
-        const tieneConsulta = gestor.citas.some(cita => {
-            if (cita.medicoId === citaSeleccionada.medicoId && cita.id !== citaSeleccionada.id) {
-                const inicioC = new Date(cita.inicio);
-                const finC = new Date(cita.fin);
-                return fechaInicioObj < finC && fechaFinObj > inicioC;
-            }
-            return false;
-        });
-
-        if (tieneConsulta) {
-            err.innerHTML = "Error: El médico ya tiene una cita en ese horario.";
-            return;
-        }
-
-        // Validar que el usuario no tiene una cita ese mismo día
-        const tieneCita = gestor.citas.some(cita => {
-            if (cita.pacienteId === citaSeleccionada.pacienteId && cita.id !== citaSeleccionada.id) {
-                const inicioP = new Date(cita.inicio);
-                const finP = new Date(cita.fin);
-                return fechaInicioObj < finP && fechaFinObj > inicioP;
-            }
-            return false;
-        });
-
-        if (tieneCita) {
-            err.innerHTML = `Error: El paciente ${pacienteLogueado.nombre} ya tiene otra cita en este horario.`;
-            return;
-        }
-
-        // APLICAR CAMBIOS
-        // Buscamos la referencia real en el array del gestor
-        const citaEnArray = gestor.citas.find(c => c.id == citaSeleccionada.id);
-
-        if (citaEnArray) {
-            // Actualizamos el objeto del gestor (en formato ISO String para el JSON)
-            citaEnArray.inicio = fechaInicioObj.toISOString();
-            citaEnArray.fin = fechaFinObj.toISOString();
-
-            // Actualizamos el calendario visualmente
-            const eventoCalendario = calendar.getEventById(citaSeleccionada.id);
-            if (eventoCalendario) {
-                eventoCalendario.setDates(fechaInicioObj, fechaFinObj);
-            }
-
-            // Guardar y Sincronizar
-            gestor.guardarEnLocalStorage();
-            await guardarEnJson();
-
-            modalCita.cerrar();
-
-            // Refrescar la referencia global para el próximo click
-            citaSeleccionada = citaEnArray;
-
-            // forzar un pequeño refresco visual
-            calendar.render();
-        }
+        gestor.guardarEnLocalStorage();
+        await guardarEnJson();
+        modalCita.cerrar();
     }
 };
 
-
-function cambiarEstado() {
-    let hoy = new Date();
-    let opciones = ["cita realizada", "cita no realizada"];
-
-    const obtenerAleatorio = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-    gestor.citas.forEach(cita => {
-        let fechaCita = new Date(cita.inicio);
-        if (fechaCita < hoy && cita.estado === "pendiente") {
-            cita.estado = obtenerAleatorio(opciones);
-        }
-    });
-
-    guardarEnJson();
-}
-
-
-
-function cleanErr() {
-    err.innerHTML = "";
-}
-
-// Parte de los eventos sin contar el evento click
+// --- Efectos Visuales ---
 
 document.addEventListener('mouseover', function (e) {
     const evento = e.target.closest('.fc-event');

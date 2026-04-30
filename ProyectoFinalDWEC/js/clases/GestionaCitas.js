@@ -110,7 +110,7 @@ export class GestorCitas {
         );
 
         this.medicos = datos.medicos.map(m =>
-            new Medico(m.id, m.nombre, m.apellidos, m.especialidad, m.telefono)
+            new Medico(m.id, m.nombre, m.apellidos, m.especialidad, m.telefono,m.dni)
         );
 
         this.citas = datos.citas.map(c =>
@@ -133,7 +133,7 @@ export class GestorCitas {
     cargarMedicosDesdeJSON(lista) {
         lista.forEach(m => {
             this.agregarMedico(
-                new Medico(m.id, m.nombre, m.apellidos, m.especialidad,m.telefono)
+                new Medico(m.id, m.nombre, m.apellidos, m.especialidad,m.telefono,m.dni)
             );
         });
     }

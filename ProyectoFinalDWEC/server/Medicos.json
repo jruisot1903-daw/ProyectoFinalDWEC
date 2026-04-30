@@ -4,69 +4,79 @@
         "nombre": "Laura",
         "apellidos": "Gómez Torres",
         "especialidad": "Medicina General",
-        "telefono": "678112233"
+        "telefono": "678112233",
+        "dni": "48291357K"
     },
     {
         "id": 2,
         "nombre": "Carlos",
         "apellidos": "Ramírez Díaz",
         "especialidad": "Pediatría",
-        "telefono": "612334455"
+        "telefono": "612334455",
+        "dni": "15937784M"
     },
     {
         "id": 3,
         "nombre": "Elena",
         "apellidos": "Serrano Muñoz",
         "especialidad": "Traumatología",
-        "telefono": "699887766"
+        "telefono": "699887766",
+        "dni": "77329145Z"
     },
     {
         "id": 4,
         "nombre": "Pablo",
         "apellidos": "Navarro Solís",
         "especialidad": "Dermatología",
-        "telefono": "644112233"
+        "telefono": "644112233",
+        "dni": "21459833H"
     },
     {
         "id": 5,
         "nombre": "Lucía",
         "apellidos": "Méndez Rico",
         "especialidad": "Ginecología",
-        "telefono": "633556677"
+        "telefono": "633556677",
+        "dni": "90331752T"
     },
     {
         "id": 6,
         "nombre": "Andrés",
         "apellidos": "Pascual Vega",
         "especialidad": "Cardiología",
-        "telefono": "622889900"
+        "telefono": "622889900",
+        "dni": "66742190S"
     },
     {
         "id": 7,
         "nombre": "Marina",
         "apellidos": "Ortega Luna",
         "especialidad": "Oftalmología",
-        "telefono": "611001122"
+        "telefono": "611001122",
+        "dni": "34591287F"
     },
     {
         "id": 8,
         "nombre": "Javier",
         "apellidos": "Sanz Ibáñez",
         "especialidad": "Neurología",
-        "telefono": "688223344"
+        "telefono": "688223344",
+        "dni": "58123490L"
     },
     {
         "id": 9,
         "nombre": "Raquel",
         "apellidos": "Heredia Sanz",
         "especialidad": "Psiquiatría",
-        "telefono": "655998877"
+        "telefono": "655998877",
+        "dni": "72900451C"
     },
     {
         "id": 10,
         "nombre": "Hugo",
         "apellidos": "Ferrer Rivas",
         "especialidad": "Endocrinología",
-        "telefono": "677445566"
+        "telefono": "677445566",
+        "dni": "81234957R"
     }
 ]
