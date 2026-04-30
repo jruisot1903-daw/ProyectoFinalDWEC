@@ -98,10 +98,6 @@ export function crearModalCita() {
 }
 
 
-// =========================
-// MODAL AGENDA
-// =========================
-
 export function crearModalAgenda() {
   const modal = createNode("div");
   modal.id = "modalAgenda";
@@ -183,6 +179,7 @@ export function crearModalAgenda() {
         fila.style.padding = "10px";
         fila.style.borderBottom = "1px solid #eee";
         fila.style.display = "flex";
+        fila.style.gap = "1em";
         fila.style.justifyContent = "space-between";
 
         const hora = new Date(c.inicio).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });

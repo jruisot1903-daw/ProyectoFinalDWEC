@@ -39,7 +39,7 @@ function cleanErr() {
 // --- Lógica de Médicos: Ver Agenda ---
 
 function mostrarAgendaMedico(fechaStr) {
-    //Filtrar citas igual que antes
+    //Filtrar citas
     const agenda = gestor.citas.filter(c => {
         const d = new Date(c.inicio);
         const fechaCita = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -88,7 +88,7 @@ function obtenerEventosDesdeGestor() {
     let citasAMostrar = [];
 
     // Detectamos el ID del usuario logueado (sea paciente o médico)
-    // Usamos || para buscar nombres alternativos si .id falla
+
     const idLogueado = String(pacienteLogueado.id || pacienteLogueado.idMedico);
 
     if (rolLogeado === "medico") {
@@ -156,7 +156,7 @@ document.getElementById("btn-login-user").addEventListener("click", function () 
     const nombreDisplay = rolLogeado === "paciente" ? pacienteLogueado.getNombreCompleto() : `Dr. ${pacienteLogueado.getNombreCompleto()}`;
     saludo.innerHTML = `Bienvenid@ (${rolLogeado}): ${nombreDisplay}`;
 
-    // REFRESCAR CALENDARIO AL LOGUEAR
+    // Refrescar calendario al loguear
     if (calendar) {
         calendar.setOption('selectable', rolLogeado === "paciente");
         calendar.removeAllEvents();
@@ -229,8 +229,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             dateClick: function (info) {
                 // Solo si el usuario es médico y está logueado
-                if (comprobante && rolLogeado === "medico") {
-                    // info.dateStr devuelve algo como "2023-10-25" o "2023-10-25T10:30:00"
+                if (comprobante && rolLogeado === "medico") {   
                     // Sacamos solo la fecha (YYYY-MM-DD)
                     const fechaSeleccionada = info.dateStr.split("T")[0];
                     mostrarAgendaMedico(fechaSeleccionada);
@@ -247,13 +246,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                // OBTENER EL DÍA QUE SE ESTÁ INTENTANDO RESERVAR (YYYY-MM-DD)
+                // Obtener el día que se esta intentando reservar
                 const fechaIntento = info.startStr.split("T")[0];
 
-                // COMPROBAR SI EL PACIENTE YA TIENE UNA CITA ESE DÍA
+                // Comprobar si el paciente ya tiene una cita ese día
                 const yaTieneCita = gestor.citas.some(c => {
                     const mismoPaciente = String(c.pacienteId) === String(pacienteLogueado.id);
-                     // startsWith como solo funciona con string tenemos que trasformar el tipo date a string
+                     // StartsWith como solo funciona con string tenemos que trasformar el tipo date a string
                     const mismaFecha = c.inicio.toISOString().startsWith(fechaIntento); 
                     return mismoPaciente && mismaFecha;
                 });
@@ -289,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (!cita) return;
 
-                // VALIDACIÓN DE PERMISOS 
+                // Validación de permisos  
                 let tienePermiso = false;
                 const idActivo = String(pacienteLogueado.id);
 
@@ -338,6 +337,8 @@ document.getElementById("btnModificar").onclick = async () => {
     if (!citaSeleccionada) return;
     cleanErr();
 
+    // Lógica de modificación si es medico 
+
     if (rolLogeado === "medico") {
         const nuevoEstado = prompt("Nuevo estado (realizada/no realizada):", citaSeleccionada.estado).toLowerCase();
 
@@ -357,7 +358,8 @@ document.getElementById("btnModificar").onclick = async () => {
         }
     }
 
-    // Lógica de modificación para pacientes...
+    // Lógica de modificación por si es paciente
+    
     const nuevoInicioStr = prompt("Nuevo inicio (YYYY-MM-DD HH:mm:ss):", formatearFecha(citaSeleccionada.inicio));
     const nuevoFinStr = prompt("Nuevo fin (YYYY-MM-DD HH:mm:ss):", formatearFecha(citaSeleccionada.fin));
 
