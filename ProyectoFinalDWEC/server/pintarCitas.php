@@ -5,13 +5,12 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-// Manejo de peticiones preflight (OPTIONS) para evitar errores de CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
 // Definir la ruta absoluta al archivo citas.json
-// __DIR__ asegura que busque el archivo en la misma carpeta que este PHP
+
 $archivoDestino = __DIR__ . '/Citas.json';
 
 //Obtener los datos enviados desde el JS
@@ -39,7 +38,6 @@ if (file_put_contents($archivoDestino, $jsonRecibido, LOCK_EX) !== false) {
         "bytes_escritos" => strlen($jsonRecibido)
     ]);
 } else {
-    // Si falla aquí, suele ser por falta de permisos de escritura en la carpeta
     http_response_code(500);
     echo json_encode([
         "status" => "error", 

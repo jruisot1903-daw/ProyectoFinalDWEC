@@ -1,9 +1,10 @@
 import { GestorCitas } from "../js/clases/GestionaCitas.js";
 import { Cita } from "../js/clases/Cita.js";
-import { crearModalCita } from "./dom.js";
+import { crearModalAgenda, crearModalCita } from "./dom.js";
 
 // --- Inicialización y Variables Globales ---
 const modalCita = crearModalCita();
+const modalAgenda = crearModalAgenda();
 const gestor = new GestorCitas();
 let pacienteLogueado = null;
 let citaSeleccionada = null;
@@ -38,23 +39,19 @@ function cleanErr() {
 // --- Lógica de Médicos: Ver Agenda ---
 
 function mostrarAgendaMedico(fechaStr) {
+    //Filtrar citas igual que antes
     const agenda = gestor.citas.filter(c => {
-        return String(c.medicoId) === String(pacienteLogueado.id) && c.inicio.startsWith(fechaStr);
+        const d = new Date(c.inicio);
+        const fechaCita = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return String(c.medicoId) === String(pacienteLogueado.id) && fechaCita === fechaStr;
     });
 
-    if (agenda.length === 0) {
-        alert(`No hay citas programadas para el día ${fechaStr}`);
-        return;
-    }
+    //Ordenar
+    agenda.sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
 
-    let listado = `AGENDA DEL DÍA ${fechaStr}:\n\n`;
-    agenda.sort((a, b) => new Date(a.inicio) - new Date(b.inicio)).forEach(c => {
-        const p = gestor.buscarPacientePorId(c.pacienteId);
-        const hora = c.inicio.split("T")[1].substring(0, 5);
-        listado += `• ${hora}h - Paciente: ${p ? p.getNombreCompleto() : "N/A"} (${c.estado})\n`;
-    });
-
-    alert(listado);
+    //Pasar datos al modal y abrir
+    modalAgenda.renderizar(fechaStr, agenda, gestor,pacienteLogueado);
+    modalAgenda.abrir();
 }
 
 // --- Gestión de Datos ---
@@ -92,12 +89,10 @@ function obtenerEventosDesdeGestor() {
 
     // Detectamos el ID del usuario logueado (sea paciente o médico)
     // Usamos || para buscar nombres alternativos si .id falla
-    const idLogueado = String(pacienteLogueado.id || pacienteLogueado.idMedico || "");
-
-    console.log("Filtrando para el ID:", idLogueado, "con Rol:", rolLogeado);
+    const idLogueado = String(pacienteLogueado.id || pacienteLogueado.idMedico);
 
     if (rolLogeado === "medico") {
-        // Filtramos: el medicoId de la cita debe ser igual al ID del médico logueado
+        // Filtramos el medicoId de la cita debe ser igual al ID del médico logueado
         citasAMostrar = gestor.citas.filter(c => String(c.medicoId) === idLogueado);
     } else if (rolLogeado === "paciente") {
         // El pacienteId de la cita debe ser igual al ID del paciente logueado
@@ -194,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('calendar');
 
         calendar = new FullCalendar.Calendar(calendarEl, {
-             // Configuración de Vista
+            // Configuración de Vista
             initialView: 'timeGridWeek', // Vista semanal con horas
             locale: 'es',                // Interfaz en español
             firstDay: 1,                 // Empieza en Lunes
@@ -233,30 +228,48 @@ document.addEventListener('DOMContentLoaded', function () {
                 return info.start >= hoy && (info.end - info.start <= 900000);
             },
             dateClick: function (info) {
-                if (rolLogeado === "medico") {
-                    mostrarAgendaMedico(info.dateStr.split("T")[0]);
+                // Solo si el usuario es médico y está logueado
+                if (comprobante && rolLogeado === "medico") {
+                    // info.dateStr devuelve algo como "2023-10-25" o "2023-10-25T10:30:00"
+                    // Sacamos solo la fecha (YYYY-MM-DD)
+                    const fechaSeleccionada = info.dateStr.split("T")[0];
+                    mostrarAgendaMedico(fechaSeleccionada);
                 }
             },
 
             // Crear Reserva
             select: function (info) {
                 cleanErr();
+
+                // Solo los pacientes reservan
                 if (rolLogeado !== "paciente") {
-                    err.innerHTML = "Solo los pacientes pueden reservar.";
                     calendar.unselect();
                     return;
                 }
 
-                // Asignamos un medico random al paciente
+                // OBTENER EL DÍA QUE SE ESTÁ INTENTANDO RESERVAR (YYYY-MM-DD)
+                const fechaIntento = info.startStr.split("T")[0];
+
+                // COMPROBAR SI EL PACIENTE YA TIENE UNA CITA ESE DÍA
+                const yaTieneCita = gestor.citas.some(c => {
+                    const mismoPaciente = String(c.pacienteId) === String(pacienteLogueado.id);
+                     // startsWith como solo funciona con string tenemos que trasformar el tipo date a string
+                    const mismaFecha = c.inicio.toISOString().startsWith(fechaIntento); 
+                    return mismoPaciente && mismaFecha;
+                });
+
+                if (yaTieneCita) {
+                    err.innerHTML = "Lo sentimos, no puedes tener más de una cita el mismo día.";
+                    calendar.unselect();
+                    return; // Detenemos la ejecución aquí
+                }
+
+                // Si el paciente no dispone de cita ese dia se le asignamos
                 const medicoId = Math.floor(Math.random() * 10) + 1;
                 const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, medicoId, info.startStr, info.endStr, "pendiente");
 
-                // Guardar en gestor 
-
                 gestor.agregarCita(nuevaCita);
                 gestor.guardarEnLocalStorage();
-
-                // Añadir al calendario 
 
                 calendar.addEvent({
                     id: String(nuevaCita.id),
@@ -266,8 +279,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     backgroundColor: "#003d21"
                 });
 
-                guardarEnJson(); // guardamos la cita en el archivo de citas.json
-                calendar.unselect(); // Limpia la selección tras terminar
+                guardarEnJson();
+                calendar.unselect();
             },
 
             eventClick: function (info) {
@@ -292,8 +305,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 citaSeleccionada = cita;
-                const nombrePaciente = gestor.buscarPacientePorId(cita.pacienteId)?.getNombreCompleto();
-                const nombreMedico = gestor.buscarMedicoPorId(cita.medicoId)?.getNombreCompleto();
+                const nombrePaciente = gestor.buscarPacientePorId(cita.pacienteId).getNombreCompleto();
+                const nombreMedico = gestor.buscarMedicoPorId(cita.medicoId).getNombreCompleto();
 
                 modalCita.setDatos(nombrePaciente, nombreMedico, formatearFecha(cita.inicio), formatearFecha(cita.fin));
                 modalCita.abrir();
@@ -326,14 +339,22 @@ document.getElementById("btnModificar").onclick = async () => {
     cleanErr();
 
     if (rolLogeado === "medico") {
-        const nuevoEstado = prompt("Nuevo estado (realizada/no realizada/pendiente):", citaSeleccionada.estado);
-        if (nuevoEstado) {
-            citaSeleccionada.estado = nuevoEstado;
-            gestor.guardarEnLocalStorage();
-            await guardarEnJson();
-            modalCita.cerrar();
+        const nuevoEstado = prompt("Nuevo estado (realizada/no realizada):", citaSeleccionada.estado).toLowerCase();
+
+
+        if (nuevoEstado === "realizada" || nuevoEstado === "no realizada") {
+
+            if (nuevoEstado) {
+                citaSeleccionada.estado = nuevoEstado;
+                gestor.guardarEnLocalStorage();
+                await guardarEnJson();
+                modalCita.cerrar();
+            }
+            return;
+        } else {
+            err.innerHTML = "No puedes escribir otra cosa diferente a (realizada/no realizada)";
+            return;
         }
-        return;
     }
 
     // Lógica de modificación para pacientes...
