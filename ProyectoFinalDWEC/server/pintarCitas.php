@@ -10,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Definir la ruta absoluta al archivo citas.json
-
 $archivoDestino = __DIR__ . '/Citas.json';
 
 //Obtener los datos enviados desde el JS
