@@ -172,7 +172,7 @@ document.getElementById("btn-login-user").addEventListener("click", function () 
     // Refrescar calendario al loguear
 
     if (calendar) {
-        // Solo el paciente (que no sea admin) tiene selectable activo por defecto
+        // Solo los pacientes tienen el  selectable activo por defecto
         calendar.setOption('selectable', rolLogeado === "paciente");
         calendar.removeAllEvents();
         calendar.addEventSource(obtenerEventosDesdeGestor());
@@ -199,7 +199,7 @@ document.getElementById("btn-logout").addEventListener("click", function () {
 
 // --- Calendario FullCalendar ---
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {     
     cargarDatosIniciales().then(() => {
         const calendarEl = document.getElementById('calendar');
 
@@ -256,42 +256,82 @@ document.addEventListener('DOMContentLoaded', function () {
             select: function (info) {
                 cleanErr();
 
-                // Solo los pacientes reservan
-                if (rolLogeado !== "paciente") {
+                //Solo pacientes o el Admin (ID 1) pueden crear citas
+                const esAdmin = String(pacienteLogueado.id) === "1";
+                if (rolLogeado !== "paciente" && !esAdmin) {
                     calendar.unselect();
                     return;
                 }
-                // Obtener el día que se esta intentando reservar
-                const fechaIntento = info.startStr.split("T")[0];
 
-                // Comprobar si el paciente ya tiene una cita ese día
-                const yaTieneCita = gestor.citas.some(c => {
-                    const mismoPaciente = String(c.pacienteId) === String(pacienteLogueado.id);
-                    const d = new Date(c.inicio);
-                    const fechaCita = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    return mismoPaciente && fechaCita === fechaIntento;
-                });
+                let idPacienteAsignado;
 
-                if (yaTieneCita) {
-                    err.innerHTML = "Lo sentimos, no puedes tener más de una cita el mismo día.";
-                    calendar.unselect();
-                    return;// Detenemos la ejecución aquí
+                if (esAdmin) {
+                    // --- Lógica para la creacción de cita Administrador ---
+                    const busqueda = prompt("ADMIN: Introduce el DNI del paciente para la cita:");
+                    if (!busqueda) {
+                        calendar.unselect();
+                        return;
+                    }
+
+                    // Buscamos al paciente en el gestor
+                    const pacienteEncontrado = gestor.pacientes.find(p =>
+                        p.dni.toLowerCase() === busqueda.toLowerCase()
+                    );
+
+                    if (!pacienteEncontrado) {
+                        alert("No se encontró ningún paciente con ese nombre o DNI.");
+                        calendar.unselect();
+                        return;
+                    }
+
+                    idPacienteAsignado = pacienteEncontrado.id;
+                } else {
+                    // --- Lógica para el paciente ---
+                    idPacienteAsignado = pacienteLogueado.id;
+
+                    // Comprobamos la restricción de una cita por día
+                    const fechaIntento = info.startStr.split("T")[0];
+                    const yaTieneCita = gestor.citas.some(c => {
+                        const d = new Date(c.inicio);
+                        const fechaCita = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        return String(c.pacienteId) === String(idPacienteAsignado) && fechaCita === fechaIntento;
+                    });
+
+                    if (yaTieneCita) {
+                        err.innerHTML = "Este paciente ya tiene una cita programada para hoy.";
+                        calendar.unselect();
+                        return;
+                    }
                 }
 
-                // Si el paciente no dispone de cita ese dia se le asignamos
-
+                // Selección de médico aleatorio
                 const medicoId = Math.floor(Math.random() * 10) + 1;
-                const nuevaCita = new Cita(Date.now(), pacienteLogueado.id, medicoId, info.startStr, info.endStr, "pendiente");
 
+                // Crear la cita
+                const nuevaCita = new Cita(
+                    Date.now(),
+                    idPacienteAsignado,
+                    medicoId,
+                    info.startStr,
+                    info.endStr,
+                    "pendiente"
+                );
+
+                // Guardar y refrescar
                 gestor.agregarCita(nuevaCita);
                 gestor.guardarEnLocalStorage();
 
+                const pacienteObj = gestor.buscarPacientePorId(idPacienteAsignado);
+                const medicoObj = gestor.buscarMedicoPorId(medicoId);
+
                 calendar.addEvent({
                     id: String(nuevaCita.id),
-                    title: `${pacienteLogueado.nombre} - ${gestor.buscarMedicoPorId(medicoId).nombre}`,
+                    title: esAdmin
+                        ? `[ADMIN] ${pacienteObj.nombre} - ${medicoObj.nombre}`
+                        : `${pacienteObj.nombre} - ${medicoObj.nombre}`,
                     start: nuevaCita.inicio,
                     end: nuevaCita.fin,
-                    backgroundColor: "#003d21"
+                    backgroundColor: esAdmin ? "#d32f2f" : "#003d21" // Rojo si la crea el admin
                 });
 
                 guardarEnJson();
@@ -359,7 +399,7 @@ document.getElementById("btnModificar").onclick = async () => {
             modalCita.cerrar();
             return;
         } else if (nuevoEstado) {
-            err.innerHTML = "Estado no válido.";
+            err.innerHTML = "No se puede introducir otra cosa que no sea ( realizada / no realizada).";
             return;
         }
     }

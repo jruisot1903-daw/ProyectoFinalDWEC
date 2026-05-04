@@ -62,7 +62,5 @@ La aplicación cuenta con una pantalla principal de acceso global. Al interactua
 > [!NOTE]
 > Actualmente, el sistema trata a todos los especialistas bajo la lógica de "Médico de Cabecera" para restringir el exceso de citas diarias por paciente.
 
-
 > [!NOTE]
-> Se Dispondra de un Usuario general , el cual podra ver todas las reservas de todos los pacientes, y tendra total libertad para modificar / crearlas /borrar citas.
-
+> Se Dispondra de un Usuario general , el cual podra ver todas las reservas de todos los pacientes, y tendra total libertad para **modificar** / **crearlas** / **borrar** citas, a la hora de crear la cita el administrador tendrá que introducir el DNI del paciente al que le quiere crear la cita.
