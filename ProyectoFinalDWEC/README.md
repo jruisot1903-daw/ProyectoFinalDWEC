@@ -59,6 +59,9 @@ La aplicación cuenta con una pantalla principal de acceso global. Al interactua
 > [!IMPORTANT]
 > **Gestión Horaria:** Se ha detectado un desfase de 2 horas al guardar en el JSON mediante `toLocaleString` (diferencia Meridiano vs Dispositivo). El sistema lo corrige automáticamente en la visualización web.
 
+> [!IMPORTANT]
+> **Modificar cita:** Tenemos dos opciones para poder modficiar la hora y el dia de la cita podemos darle click , nos saldra el modal y darle a modificar y ya modificarlo o directamente podemos con el raton coger la cita y moverla al dia que queramos.
+
 > [!NOTE]
 > Actualmente, el sistema trata a todos los especialistas bajo la lógica de "Médico de Cabecera" para restringir el exceso de citas diarias por paciente.
 

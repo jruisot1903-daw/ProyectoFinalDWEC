@@ -216,10 +216,10 @@ document.addEventListener('DOMContentLoaded', function () {
             ],
 
             // Interactividad de Reservas
-            selectable: true,            // Permite hacer clic y arrastrar
+            selectable: false,            // Permite hacer clic y arrastrar
             selectOverlap: false,        // No permite reservar sobre otra cita
             selectMirror: true,          // Muestra un marcador mientras arrastras
-            editable: false,              // No Permite mover citas ya creadas
+            editable: true,              // No Permite mover citas ya creadas
             selectConstraint: 'businessHours', // Solos las nos permite las horas que hayamos dicho que trabajamos
 
             selectAllow: function (info) {
@@ -231,6 +231,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (comprobante && (rolLogeado === "medico" || esAdmin())) {
                     mostrarAgendaMedico(info.dateStr.split("T")[0]);
                 }
+            },
+
+            //Al soltar la cita poder cambiarla y modificarle el dia y la hora
+
+            eventDrop: async function (info) {
+                //Buscamos la cita en el gestor usando el ID del evento de FullCalendar
+                const cita = gestor.citas.find(c => String(c.id) === String(info.event.id));
+
+                if (!cita) {
+                    alert("Error: No se encontró la cita en el sistema.");
+                    info.revert(); // Revierte el movimiento visual si no hay datos
+                    return;
+                }
+
+                // Verificación de permisos (Solo el paciente dueño o el Admin pueden moverla)
+                const idLogueado = String(pacienteLogueado.id);
+                const esDuenio = (rolLogeado === "paciente" && String(cita.pacienteId) === idLogueado);
+
+                if (!esAdmin() && !esDuenio) {
+                    alert("No tienes permiso para mover esta cita.");
+                    info.revert();
+                    return;
+                }
+
+                // Confirmación del usuario
+                if (!confirm(`¿Deseas mover la cita de ${info.event.title} al ${info.event.start.toLocaleString()}?`)) {
+                    info.revert();
+                    return;
+                }
+
+                // Actualizamos las fechas en nuestro objeto lógico
+                // FullCalendar ya actualizó info.event, ahora actualizamos nuestro array 'citas'
+                cita.inicio = info.event.start.toISOString();
+                cita.fin = info.event.end ? info.event.end.toISOString() : info.event.start.toISOString();
+
+                // Persistencia (Guardar cambios)
+                gestor.guardarEnLocalStorage();
+                await guardarEnJson();
+
+            
             },
 
             // Crear Reserva
@@ -341,7 +381,7 @@ document.getElementById("btnModificar").onclick = async () => {
         }
     }
 
-    //Lógica de Médico (Estado) 
+    // Lógica de Médico (Estado) 
 
     if (rolLogeado === "medico" || eleccionAdmin === "1") {
         const estado = prompt("Estado (realizada/no realizada):", citaSeleccionada.estado)?.toLowerCase();
